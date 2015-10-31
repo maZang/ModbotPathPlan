@@ -10,18 +10,21 @@ public class GenerateMesh : MonoBehaviour {
 		Mesh mesh = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 		mesh.vertices = navmesh.vertices;
+		foreach (Vector3 vertice in mesh.vertices) {
+			print(vertice);
+		}
 		mesh.triangles = navmesh.indices;
-
+/*
 		Vector2[] uvs = new Vector2[mesh.vertices.Length];
 
 		for (int i = 0; i < uvs.Length; i++) {
 			uvs[i] = new Vector2(mesh.vertices[i].x, mesh.vertices[i].z);
 		}
-		mesh.uv = uvs;
+		mesh.uv = uvs; */
+
+		MeshFilter mf = GetComponent<MeshFilter>();
 	}
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+	void Update() {
+    }
 }
