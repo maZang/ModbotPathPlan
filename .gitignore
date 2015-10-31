@@ -12,7 +12,7 @@ obj/
 *.user
 *.unityproj
 *.booproj
-
+*.sln
 .DS_Store
 .DS_Store?
 ._*
