@@ -47,8 +47,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\CarControl.cs" />
-     <Compile Include="Assets\Scripts\GenerateMesh.cs" />
+     <Compile Include="Assets\Scripts\GenerateGraph.cs" />
+     <Compile Include="Assets\Scripts\PathPlanning.cs" />
      <Compile Include="Assets\Scripts\SmoothFollow.cs" />
+     <Compile Include="Assets\Scripts\Triangle.cs" />
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>
