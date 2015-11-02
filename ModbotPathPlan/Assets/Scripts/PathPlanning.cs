@@ -3,6 +3,9 @@ using System.Collections;
 
 public class PathPlanning : MonoBehaviour {
 
+	/* Set true for debug purposes */
+	public bool debug; 
+
 	public GenerateGraph map;
 	// Use this for initialization
 	void Start () {
@@ -12,7 +15,7 @@ public class PathPlanning : MonoBehaviour {
 
 	//draw nodes as spheres for debugging purposes
 	void OnDrawGizmosSelected() {
-		foreach (Triangle triangle in map.nodes) {
+		foreach (Triangle triangle in map.meshTriangles) {
 			Gizmos.color = new Color(2f, 2f, 2f);
 			Gizmos.DrawSphere (triangle.Centroid(), 0.3f);
 			Gizmos.color = Color.red;
