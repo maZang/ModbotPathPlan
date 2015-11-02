@@ -2,7 +2,7 @@
 using System.Collections;
 
 /* Class used to represent the triangulation of the NavMeshes */
-public class Triangle : System.IComparable {
+public class Triangle {
 
 	public Vector3 vertex1;
 	public Vector3 vertex2;
@@ -41,7 +41,4 @@ public class Triangle : System.IComparable {
 		return "Triangle: \n\tVertex1: " + vertex1.ToString () + "\n\tVertex2: " + vertex2.ToString () + "\n\tVertex3: " + vertex3.ToString () + "\n\tCost: " + cost;
 	}
 
-	public int CompareTo (Triangle t) {
-
-	}
 }
