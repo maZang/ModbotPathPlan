@@ -131,7 +131,7 @@ public class GenerateGraph {
 	public class Node : System.IComparable {
 		public Triangle triangle;
 		public List<Node> neighbors;
-		public int priority;
+		public float priority;
 
 		public Node(Triangle t) {
 			triangle = t;

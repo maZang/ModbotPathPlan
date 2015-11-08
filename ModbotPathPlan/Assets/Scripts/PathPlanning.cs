@@ -44,7 +44,7 @@ public class PathPlanning : MonoBehaviour {
 		PriorityQueue<GenerateGraph.Node> pq = new PriorityQueue<GenerateGraph.Node>(map.nodes.Count);
 		pq.queue(startNode);
 		Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
-		Dictionary<Node, int> cost_so_far = new Dictionary<Node, int> ();
+		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
 		came_from.Add(startNode, null);
 		cost_so_far.Add (startNode, 0);
 
@@ -55,7 +55,7 @@ public class PathPlanning : MonoBehaviour {
 			}
 
 			for (int i = 0; i < current.neighbors.Count; i++) {
-				int new_cost = cost_so_far[current] + 
+				float new_cost = cost_so_far[current] + 
 					distanceBetweenNodes(current, current.neighbors[i]);
 				if (cost_so_far.ContainsKey(current.neighbors[i]) == false ||
 				    new_cost < cost_so_far[current.neighbors[i]]) {
@@ -85,8 +85,8 @@ public class PathPlanning : MonoBehaviour {
 	// </summary>
 	// <param name="n1"> the first given Node </param>
 	// <param name="n2"> the second given Node </param>
-	public int distanceBetweenNodes(GenerateGraph.Node n1, GenerateGraphNode.Node n2) {
-		return Vector3.Distance (n1.triangle.Centroid (), n2.triangle.Centroid());
+	public float distanceBetweenNodes(GenerateGraph.Node n1, GenerateGraph.Node n2) {
+		return Vector3.Distance(n1.triangle.Centroid (), n2.triangle.Centroid());
 	}
  
 
