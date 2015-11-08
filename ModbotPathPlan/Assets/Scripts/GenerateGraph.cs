@@ -7,6 +7,7 @@ public class GenerateGraph {
 	public Triangle[] meshTriangles;
 	public List<Node> nodes; //a Node contains a triangle and adjacent Nodes
 	public Node startNode;
+	public Node endNode;
 
 	public GenerateGraph() {
 
@@ -127,13 +128,20 @@ public class GenerateGraph {
 		return return_string;
 	}
 
-	public class Node {
+	public class Node : System.IComparable {
 		public Triangle triangle;
 		public List<Node> neighbors;
+		public int priority;
 
 		public Node(Triangle t) {
 			triangle = t;
 			neighbors = new List<Node>();
+			priority = 0;
+		}
+
+		public int CompareTo(object obj) {
+			Node node2 = obj as Node;
+			return this.priority.CompareTo(node2.priority);
 		}
 
 	}

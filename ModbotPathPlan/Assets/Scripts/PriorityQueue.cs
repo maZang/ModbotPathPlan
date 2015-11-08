@@ -72,4 +72,8 @@ public class PriorityQueue<T> where T : System.IComparable {
 		Heapify (1);
 		return removed; 
 	}
+
+	public int getSize() {
+		return size;
+	}
 }
