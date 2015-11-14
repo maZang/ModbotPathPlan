@@ -17,7 +17,7 @@ public class PathPlanning : MonoBehaviour {
 	public void Start () {
 		map = new GenerateGraph ();
 		print (map.ToString ());
-		determinePath(map.startNode, map.endNode);
+		//determinePath(map.startNode, map.endNode);
 	}
 
 	//draw nodes as spheres for debugging purposes
@@ -41,10 +41,12 @@ public class PathPlanning : MonoBehaviour {
 	// <param name="startNode"> the start Node </param>
 	// <param name="endNode"> the end Node </param>
 	public void determinePath(GenerateGraph.Node startNode, GenerateGraph.Node endNode) {
+		if (startNode == null || endNode == null)
+			return;
 		PriorityQueue<GenerateGraph.Node> pq = new PriorityQueue<GenerateGraph.Node>(map.nodes.Count);
 		pq.queue(startNode);
-		Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
-		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
+		Dictionary<GenerateGraph.Node, GenerateGraph.Node> came_from = new Dictionary<GenerateGraph.Node, GenerateGraph.Node>();
+		Dictionary<GenerateGraph.Node, float> cost_so_far = new Dictionary<GenerateGraph.Node, float> ();
 		came_from.Add(startNode, null);
 		cost_so_far.Add (startNode, 0);
 

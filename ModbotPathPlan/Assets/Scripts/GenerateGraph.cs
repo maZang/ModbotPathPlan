@@ -60,6 +60,7 @@ public class GenerateGraph {
 
 		//set start node
 		startNode = nodes[0];
+		endNode = nodes [0];
 	}
 
 	// <summary>
