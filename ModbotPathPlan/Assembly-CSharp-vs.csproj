@@ -48,6 +48,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\CarControl.cs" />
      <Compile Include="Assets\Scripts\GenerateGraph.cs" />
+     <Compile Include="Assets\Scripts\ObstacleAvoid.cs" />
      <Compile Include="Assets\Scripts\PathPlanning.cs" />
      <Compile Include="Assets\Scripts\PriorityQueue.cs" />
      <Compile Include="Assets\Scripts\SmoothFollow.cs" />
