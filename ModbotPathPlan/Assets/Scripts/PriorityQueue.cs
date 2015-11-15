@@ -70,7 +70,7 @@ public class PriorityQueue<T> where T : System.IComparable {
 	}
 
 	public T dequeue() {
-		T removed = minHeap [size];
+		T removed = minHeap [1];
 		minHeap[1] = minHeap[size--];
 		Heapify (1);
 		return removed; 

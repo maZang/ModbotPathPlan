@@ -130,6 +130,22 @@ public class GenerateGraph {
 		return return_string;
 	}
 
+	public string ToStringWithNeighbors() {
+		string return_string = "";
+		Dictionary<Node, int> pairToNodes =
+			new Dictionary<Node, int>();
+		for (int i = 0; i < nodes.Count; i++) {
+			pairToNodes.Add (nodes[i], i);
+		}
+		for (int i = 0; i < nodes.Count; i++) {
+			return_string += "\n" + "Node: " + i + " has neighbors ";
+			for (int j = 0; j < nodes[i].neighbors.Count; j++) {
+				return_string += pairToNodes[nodes[i].neighbors[j]] + ", ";
+			}
+		}
+		return return_string;
+	}
+
 	public class Node : System.IComparable {
 		public Triangle triangle;
 		public List<Node> neighbors;

@@ -16,7 +16,7 @@ public class PathPlanning : MonoBehaviour {
 	// Use this for initialization
 	public void SetUpPathPlanning () {
 		map = new GenerateGraph();
-		print (map.ToString());
+		print (map.ToStringWithNeighbors());
 		print (map.nodes.Count);
 		print ("Hia");
 		print ("Hia");
@@ -55,10 +55,16 @@ public class PathPlanning : MonoBehaviour {
 		Dictionary<GenerateGraph.Node, float> cost_so_far = new Dictionary<GenerateGraph.Node, float> ();
 		came_from.Add(startNode, null);
 		cost_so_far.Add (startNode, 0);
+
+		Dictionary<GenerateGraph.Node, int> nodeToId = new Dictionary<GenerateGraph.Node, int>();
+		for (int i = 0; i < map.nodes.Count; i++) {
+			nodeToId.Add (map.nodes[i], i);
+		}
 		GenerateGraph.Node current;
 
 		while (pq.getSize() > 0) {
 			current = pq.dequeue();
+			print ("Current Node: " + nodeToId[current]);
 			if (current.Equals(endNode)) {
 				print ("Reached End. End Node: " + endNode.triangle.ToString () + " Came From: " + came_from[endNode].triangle.ToString());
 				break;
@@ -72,8 +78,8 @@ public class PathPlanning : MonoBehaviour {
 					cost_so_far[current.neighbors[i]] = new_cost;
 					current.neighbors[i].priority = new_cost;
 					pq.queue(current.neighbors[i]);
+					print ("Added New Node: " + nodeToId[current.neighbors[i]] + " Priority: " + current.neighbors[i].priority);
 					came_from[current.neighbors[i]] = current;
-					print ("Key: " + current.neighbors[i].triangle.ToString () +"Value: " + came_from[current.neighbors[i]].triangle.ToString ());
 				}
 			}
 		}
@@ -83,14 +89,15 @@ public class PathPlanning : MonoBehaviour {
 		GenerateGraph.Node currentNode = endNode;
 		path.Add (currentNode);
 		while (currentNode.Equals(startNode) == false) {
-			print ("a " + currentNode.triangle.ToString());
 			currentNode = came_from[currentNode];
-			print ("b " + currentNode.triangle.ToString());
 			path.Add (currentNode);
 		}
 
 		path.Reverse();
-		printPath();
+		print ("Path Nodes: ");
+		for (int i = 0; i < path.Count; i++) {
+			print(nodeToId[path[i]] + "\n");
+		}
 	}
 
 	// <summary>
