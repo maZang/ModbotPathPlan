@@ -9,7 +9,7 @@ public class GenerateGraph {
 	public Node startNode;
 	public Node endNode;
 
-	public GenerateGraph() {
+	public GenerateGraph(Vector3 start) {
 
 		//get nav mesh characteristics from pre-made nav mesh. Will write script later that generates 
 		//a nav-mesh for any map.
@@ -59,10 +59,24 @@ public class GenerateGraph {
 		}
 
 		//set start node of the car
-		startNode = nodes[0];
+		startNode = getClosestNode(start);
 		//set end node of the car
 		endNode = nodes[10];
 	}
+
+	public Node getClosestNode(Vector3 pos) {
+		float minimumDistance = Mathf.Infinity; 
+		Node closestNode = null; 
+		foreach (Node node in nodes) {
+			float distance = Vector3.Distance(node.triangle.Centroid (), pos);
+			if (distance < minimumDistance) {
+				closestNode = node; 
+				minimumDistance = distance; 
+			}
+		}
+		return closestNode; 
+	}
+
 
 	// <summary>
 	// Given a dictionary that maps a string representing a Vector3 pair
@@ -154,6 +168,14 @@ public class GenerateGraph {
 		public Node(Triangle t) {
 			triangle = t;
 			neighbors = new List<Node>();
+			priority = 0;
+		}
+
+		public Node(Vector3 pos, Node n) {
+			triangle = new Triangle(pos, pos, pos, 1.0f);
+			neighbors = new List<Node>();
+			neighbors.Add (n); 
+			Debug.Log(n.triangle.Centroid ()); 
 			priority = 0;
 		}
 

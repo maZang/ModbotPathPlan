@@ -93,7 +93,7 @@ public class CarControl : MonoBehaviour {
 	private void PathPlan() {
 		pathPlanner = new PathPlanning();
 		print ("Start path plan");
-		pathPlanner.SetUpPathPlanning ();
+		pathPlanner.SetUpPathPlanning (transform.position);
 		print ("End path plan");
 		wayPoints = new List<Vector3> ();
 		foreach (GenerateGraph.Node pathNode in pathPlanner.path) { 
@@ -171,6 +171,23 @@ public class CarControl : MonoBehaviour {
 	//get each of the wheels
 	private WheelCollider GetCollider(int n) {
 		return wheels[n].gameObject.GetComponent<WheelCollider>();
+	}
+
+	public void OnDrawGizmosSelected() {
+		if (wayPoints == null) {
+			return; 
+		}
+		for (int i = 0; i < wayPoints.Count; i++) { 
+			Vector3 point = wayPoints[i];
+			Gizmos.color = new Color (0.0f, 0.0f, 1.0f, 0.3f);
+			Gizmos.DrawCube (point, new Vector3 (5.0f, 5.0f, 5.0f));
+		
+			int x = i + 1;
+			if (x < wayPoints.Count) {
+				Gizmos.color = Color.magenta;
+				Gizmos.DrawLine (point, wayPoints[x]);
+			}
+		}
 	}
 
 }

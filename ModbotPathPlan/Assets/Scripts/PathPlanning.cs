@@ -14,13 +14,10 @@ public class PathPlanning : MonoBehaviour {
 	public List<GenerateGraph.Node> path;
 
 	// Use this for initialization
-	public void SetUpPathPlanning () {
-		map = new GenerateGraph();
+	public void SetUpPathPlanning (Vector3 start) {
+		map = new GenerateGraph(start);
 		print (map.ToStringWithNeighbors());
 		print (map.nodes.Count);
-		print ("Hia");
-		print ("Hia");
-		print ("Hia");
 		determinePath(map.startNode, map.endNode);
 	}
 

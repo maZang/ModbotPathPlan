@@ -40,8 +40,10 @@ public class ObstacleAvoid : MonoBehaviour {
 		Collider obstacle = findClosestObstacle ();
 		if (obstacle != null) {
 			avoidObstacle = true; 
-			BingBangAvoidance(obstacle);
+			BingBangAvoidance (obstacle);
+		} else {
+			avoidObstacle = false; 
 		}
-		print (obstacle); 
+		//print (obstacle); 
 	}
 }
