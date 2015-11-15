@@ -58,9 +58,10 @@ public class GenerateGraph {
 			}
 		}
 
-		//set start node
+		//set start node of the car
 		startNode = nodes[0];
-		endNode = nodes [0];
+		//set end node of the car
+		endNode = nodes[10];
 	}
 
 	// <summary>

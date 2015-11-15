@@ -14,13 +14,18 @@ public class PathPlanning : MonoBehaviour {
 	public List<GenerateGraph.Node> path;
 
 	// Use this for initialization
-	public void Start () {
-		map = new GenerateGraph ();
-		print (map.ToString ());
-		//determinePath(map.startNode, map.endNode);
+	public void SetUpPathPlanning () {
+		map = new GenerateGraph();
+		print (map.ToString());
+		print (map.nodes.Count);
+		print ("Hia");
+		print ("Hia");
+		print ("Hia");
+		determinePath(map.startNode, map.endNode);
 	}
 
 	//draw nodes as spheres for debugging purposes
+	/*
 	public void OnDrawGizmosSelected() {
 		foreach (Triangle triangle in map.meshTriangles) {
 			Gizmos.color = new Color(2f, 2f, 2f);
@@ -34,6 +39,7 @@ public class PathPlanning : MonoBehaviour {
 			Gizmos.DrawSphere (triangle.vertex3, 0.2f);
 		}
 	}
+	*/
 
 	// <summary>
 	// Given two Node objects, determines a path between the startNode and the endNode
@@ -49,10 +55,12 @@ public class PathPlanning : MonoBehaviour {
 		Dictionary<GenerateGraph.Node, float> cost_so_far = new Dictionary<GenerateGraph.Node, float> ();
 		came_from.Add(startNode, null);
 		cost_so_far.Add (startNode, 0);
+		GenerateGraph.Node current;
 
 		while (pq.getSize() > 0) {
-			GenerateGraph.Node current = pq.dequeue();
+			current = pq.dequeue();
 			if (current.Equals(endNode)) {
+				print ("Reached End. End Node: " + endNode.triangle.ToString () + " Came From: " + came_from[endNode].triangle.ToString());
 				break;
 			}
 
@@ -65,6 +73,7 @@ public class PathPlanning : MonoBehaviour {
 					current.neighbors[i].priority = new_cost;
 					pq.queue(current.neighbors[i]);
 					came_from[current.neighbors[i]] = current;
+					print ("Key: " + current.neighbors[i].triangle.ToString () +"Value: " + came_from[current.neighbors[i]].triangle.ToString ());
 				}
 			}
 		}
@@ -74,12 +83,24 @@ public class PathPlanning : MonoBehaviour {
 		GenerateGraph.Node currentNode = endNode;
 		path.Add (currentNode);
 		while (currentNode.Equals(startNode) == false) {
+			print ("a " + currentNode.triangle.ToString());
 			currentNode = came_from[currentNode];
+			print ("b " + currentNode.triangle.ToString());
 			path.Add (currentNode);
 		}
+
 		path.Reverse();
+		printPath();
 	}
 
+	// <summary>
+	// Prints all nodes in the calculated path
+	// </summary>
+	public void printPath() {
+		for (int i = 0; i < path.Count; i++) {
+			print(path[i].triangle.ToString() + "\n");
+		}
+	}
 
 	// <summary>
 	// Given two Node objects, determines the distance between them. Specifically, the

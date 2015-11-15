@@ -42,14 +42,17 @@ public class PriorityQueue<T> where T : System.IComparable {
 
 	private void Heapify (int pos) {
 		if (!isLeaf(pos)) {
-			if (minHeap[pos].CompareTo(minHeap[getLeftChild(pos)]) > 0  || minHeap[pos].CompareTo(minHeap[getRightChild(pos)]) > 0) {
-				if (minHeap[getLeftChild(pos)].CompareTo(minHeap[getRightChild(pos)]) < 0) {
-					swap(getLeftChild(pos), pos);
-					Heapify(getLeftChild(pos));
+			int leftIndex = getLeftChild(pos);
+			int rightIndex = getRightChild(pos);
+			if ((size >= leftIndex && minHeap[pos].CompareTo(minHeap[leftIndex]) > 0)  || 
+			(size >= rightIndex && minHeap[pos].CompareTo(minHeap[rightIndex]) > 0)) {
+				if (minHeap[leftIndex].CompareTo(minHeap[rightIndex]) < 0) {
+					swap(leftIndex, pos);
+					Heapify(leftIndex);
 				}
 				else {
-					swap(getRightChild(pos), pos);
-					Heapify(getRightChild(pos));
+					swap(rightIndex, pos);
+					Heapify(rightIndex);
 				}
 			}
 		}
@@ -60,7 +63,7 @@ public class PriorityQueue<T> where T : System.IComparable {
 			return;
 		minHeap [++size] = element;
 		int pos = size;
-		while (minHeap[pos].CompareTo(minHeap[getParent(pos)]) < 0 || pos == 1) {
+		while (pos > 1 && minHeap[pos].CompareTo(minHeap[getParent(pos)]) < 0) {
 			swap (pos, getParent(pos));
 			pos = getParent(pos);
 		}

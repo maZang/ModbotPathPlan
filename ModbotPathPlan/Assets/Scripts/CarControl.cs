@@ -33,14 +33,18 @@ public class CarControl : MonoBehaviour {
 
 	// Objects holding the way points for car movement
 	public GameObject wayPointObject;
-	private List<Transform> wayPoints; 
+	private List<Vector3> wayPoints; 
 	private int current_point = 0;
+	// Represents the path planning object
+	PathPlanning pathPlanner;
 
-	//initialize center of mass to prevent car from flipping over too much, as well as getting way points from in game object
+	//Initialize center of mass to prevent car from flipping over too much,
+	//Path plan by calculating a graph from the map and determining the waypoints
 	void Start () {
 		rb = GetComponent<Rigidbody>();
 		rb.centerOfMass = new Vector3(0.0f,-0.3f,0.7f);
-		GetWayPoints ();
+		PathPlan();
+		//GetWayPoints ();
 	}
 
 	//allows for manual drive or AI pathfinding
@@ -85,8 +89,20 @@ public class CarControl : MonoBehaviour {
 		GetCollider (1).steerAngle = maxSteer * input_steer;
 	}
 
+	//Path plan by determining the waypoints
+	private void PathPlan() {
+		pathPlanner = new PathPlanning();
+		print ("Start path plan");
+		pathPlanner.SetUpPathPlanning ();
+		print ("End path plan");
+		wayPoints = new List<Vector3> ();
+		foreach (GenerateGraph.Node pathNode in pathPlanner.path) { 
+			wayPoints.Add(pathNode.triangle.Centroid());
+		}
+	}
+
 	//get the way points from the in game object
-	private void GetWayPoints() {
+	/*private void GetWayPoints() {
 		Transform[] tenativeWayPoints = wayPointObject.GetComponentsInChildren<Transform> ();
 		wayPoints = new List<Transform> ();
 
@@ -94,7 +110,7 @@ public class CarControl : MonoBehaviour {
 			if (point.transform != wayPointObject.transform) 
 				wayPoints.Add(point);
 		}
-	}
+	}*/
 
 	private void ShiftGears() {
 		if (input_rpm >= maxEngineRPM) {
@@ -118,7 +134,7 @@ public class CarControl : MonoBehaviour {
 
 	//set input_steer and input_torque to move towards the way point 
 	private void GoToWayPoint() {
-		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].position.x, transform.position.y, wayPoints[current_point].position.z));
+		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].x, transform.position.y, wayPoints[current_point].z));
 
 		input_steer = travelDirection.x / travelDirection.magnitude;
 
@@ -140,7 +156,7 @@ public class CarControl : MonoBehaviour {
 		int next_point = current_point + 1;
 		if (next_point >= wayPoints.Count)
 			next_point = 0;
-		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (wayPoints [next_point].position.x, transform.position.y, wayPoints [next_point].position.z));
+		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[next_point].x, transform.position.y, wayPoints[next_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 
 		if (angle > 90.0f && rb.velocity.magnitude > 5.0f) {
