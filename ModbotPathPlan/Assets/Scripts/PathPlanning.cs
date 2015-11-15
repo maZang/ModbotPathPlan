@@ -14,13 +14,18 @@ public class PathPlanning : MonoBehaviour {
 	public List<GenerateGraph.Node> path;
 
 	// Use this for initialization
-	public void Start () {
-		map = new GenerateGraph ();
-		print (map.ToString ());
-		//determinePath(map.startNode, map.endNode);
+	public void SetUpPathPlanning () {
+		map = new GenerateGraph();
+		print (map.ToStringWithNeighbors());
+		print (map.nodes.Count);
+		print ("Hia");
+		print ("Hia");
+		print ("Hia");
+		determinePath(map.startNode, map.endNode);
 	}
 
 	//draw nodes as spheres for debugging purposes
+	/*
 	public void OnDrawGizmosSelected() {
 		foreach (Triangle triangle in map.meshTriangles) {
 			Gizmos.color = new Color(2f, 2f, 2f);
@@ -34,6 +39,7 @@ public class PathPlanning : MonoBehaviour {
 			Gizmos.DrawSphere (triangle.vertex3, 0.2f);
 		}
 	}
+	*/
 
 	// <summary>
 	// Given two Node objects, determines a path between the startNode and the endNode
@@ -50,9 +56,17 @@ public class PathPlanning : MonoBehaviour {
 		came_from.Add(startNode, null);
 		cost_so_far.Add (startNode, 0);
 
+		Dictionary<GenerateGraph.Node, int> nodeToId = new Dictionary<GenerateGraph.Node, int>();
+		for (int i = 0; i < map.nodes.Count; i++) {
+			nodeToId.Add (map.nodes[i], i);
+		}
+		GenerateGraph.Node current;
+
 		while (pq.getSize() > 0) {
-			GenerateGraph.Node current = pq.dequeue();
+			current = pq.dequeue();
+			print ("Current Node: " + nodeToId[current]);
 			if (current.Equals(endNode)) {
+				print ("Reached End. End Node: " + endNode.triangle.ToString () + " Came From: " + came_from[endNode].triangle.ToString());
 				break;
 			}
 
@@ -64,6 +78,7 @@ public class PathPlanning : MonoBehaviour {
 					cost_so_far[current.neighbors[i]] = new_cost;
 					current.neighbors[i].priority = new_cost;
 					pq.queue(current.neighbors[i]);
+					print ("Added New Node: " + nodeToId[current.neighbors[i]] + " Priority: " + current.neighbors[i].priority);
 					came_from[current.neighbors[i]] = current;
 				}
 			}
@@ -77,9 +92,22 @@ public class PathPlanning : MonoBehaviour {
 			currentNode = came_from[currentNode];
 			path.Add (currentNode);
 		}
+
 		path.Reverse();
+		print ("Path Nodes: ");
+		for (int i = 0; i < path.Count; i++) {
+			print(nodeToId[path[i]] + "\n");
+		}
 	}
 
+	// <summary>
+	// Prints all nodes in the calculated path
+	// </summary>
+	public void printPath() {
+		for (int i = 0; i < path.Count; i++) {
+			print(path[i].triangle.ToString() + "\n");
+		}
+	}
 
 	// <summary>
 	// Given two Node objects, determines the distance between them. Specifically, the

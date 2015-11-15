@@ -58,9 +58,10 @@ public class GenerateGraph {
 			}
 		}
 
-		//set start node
+		//set start node of the car
 		startNode = nodes[0];
-		endNode = nodes [0];
+		//set end node of the car
+		endNode = nodes[10];
 	}
 
 	// <summary>
@@ -125,6 +126,22 @@ public class GenerateGraph {
 		string return_string = "";
 		foreach (Node node in nodes) {
 			 return_string += "\n" + (node.triangle.ToString());
+		}
+		return return_string;
+	}
+
+	public string ToStringWithNeighbors() {
+		string return_string = "";
+		Dictionary<Node, int> pairToNodes =
+			new Dictionary<Node, int>();
+		for (int i = 0; i < nodes.Count; i++) {
+			pairToNodes.Add (nodes[i], i);
+		}
+		for (int i = 0; i < nodes.Count; i++) {
+			return_string += "\n" + "Node: " + i + " has neighbors ";
+			for (int j = 0; j < nodes[i].neighbors.Count; j++) {
+				return_string += pairToNodes[nodes[i].neighbors[j]] + ", ";
+			}
 		}
 		return return_string;
 	}
