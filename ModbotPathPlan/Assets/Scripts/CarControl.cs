@@ -10,6 +10,10 @@ public class CarControl : MonoBehaviour {
 	//the rigidbody of the car
 	private Rigidbody rb; 
 
+	//whether or not this car is currently avoiding objects
+	private bool avoidObject; 
+	private float angleObject;
+
 	//These are gear ratios that are the ratios to apply the torque to the wheels for maximum realism
 	public float[] GearRatio;
 	public int CurrGear = 0;
@@ -57,6 +61,8 @@ public class CarControl : MonoBehaviour {
 
 	//code for self-driving of car/debugging purposes 
 	void Manual_Update() {
+		avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
+		angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
 		input_torque = Input.GetAxis("Vertical") * engineTorque * Time.deltaTime * 250.0f;
 		input_steer = Input.GetAxis("Horizontal") * maxSteer;
 
@@ -66,10 +72,13 @@ public class CarControl : MonoBehaviour {
 		GetCollider(1).motorTorque = input_torque;
 		GetCollider(2).motorTorque = input_torque;
 		GetCollider(3).motorTorque = input_torque;
+		//print (angleObject);
 	}
 
 	//car driving around the waypoints
 	void AI_Update () {
+		avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
+		angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
 		rb.drag = rb.velocity.magnitude / 250;
 		GoToWayPoint ();
 
@@ -87,6 +96,7 @@ public class CarControl : MonoBehaviour {
 
 		GetCollider (0).steerAngle = maxSteer * input_steer;
 		GetCollider (1).steerAngle = maxSteer * input_steer;
+		//print (avoidObject);
 	}
 
 	//Path plan by determining the waypoints

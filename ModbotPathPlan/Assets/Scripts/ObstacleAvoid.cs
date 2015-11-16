@@ -3,47 +3,44 @@ using System.Collections;
 using System.Collections.Generic; 
 
 public class ObstacleAvoid : MonoBehaviour {
-
-	public float visionRange;
-	public GameObject map; 
+	
+	public float angleRange = 90f;
 	public bool avoidObstacle;
+	public float angleObstacle;
+	public Vector3 obstaclePosition;
+	public Collider obstacleObject; 
+	public float carRadiusApprox = 3;
 
-	private List<RaycastHit> filterRaycastMap(List<RaycastHit> hits) {
-		List<GameObject> travelable = new List<GameObject>(GameObject.FindGameObjectsWithTag ("non-obstacle"));
-		List<RaycastHit> filteredhits = new List<RaycastHit>(); 
-		foreach (RaycastHit hit in hits) {
-			if (travelable.Contains(hit.collider.gameObject)) {
-				continue; 
-			}
-			filteredhits.Add(hit); 
-		}
-		return filteredhits;
+	private SphereCollider col;
+
+	void Awake () {
+		col = GetComponent<SphereCollider>();
 	}
 
-	private Collider findClosestObstacle() {
-		Collider closetObstacle = null; 
-		List<RaycastHit> hits = filterRaycastMap(new List<RaycastHit>(Physics.RaycastAll (transform.position, transform.forward, visionRange)));
-		float minimumDistance = visionRange;
-		foreach (RaycastHit hit in hits) {
-			if (hit.distance < minimumDistance) {
-				closetObstacle = hit.collider; 
-			}
-		}
-		return closetObstacle;
+	void Update () {
+		//print (avoidObstacle);
 	}
 
-	private void BingBangAvoidance(Collider obstacle) {
-
-	}
-
-	void FixedUpdate () {
-		Collider obstacle = findClosestObstacle ();
-		if (obstacle != null) {
-			avoidObstacle = true; 
-			BingBangAvoidance (obstacle);
-		} else {
+	void OnTriggerStay(Collider other) {
+		if (other.gameObject.tag != "non-obstacle") {
 			avoidObstacle = false; 
+			Vector3 frontposition = 0.5f * (transform.GetChild(0).position + transform.GetChild (1).position);
+			RaycastHit hit;
+			if (Physics.SphereCast(frontposition, carRadiusApprox, transform.forward, out hit, col.radius)) {
+				if (hit.collider.gameObject.tag != "non-obstacle") {
+					Vector3 obstacle = hit.point;
+					Vector3 direction = obstacle - frontposition; 
+					float angle = Vector3.Angle(direction, transform.forward); 
+					if (angle < angleRange / 2.0f) {
+						avoidObstacle = true;
+						angleObstacle = angle; 
+						obstaclePosition = hit.point;
+						obstacleObject = hit.collider;
+						print ("object: " + hit.collider.gameObject + " angle: " + angle);
+					}
+				}
+			}
+
 		}
-		//print (obstacle); 
 	}
 }
