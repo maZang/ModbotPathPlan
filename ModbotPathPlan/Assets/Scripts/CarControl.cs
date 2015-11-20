@@ -11,8 +11,15 @@ public class CarControl : MonoBehaviour {
 	private Rigidbody rb; 
 
 	//whether or not this car is currently avoiding objects
-	private bool avoidObject; 
+	/*private bool avoidObject; 
 	private float angleObject;
+	private Vector3 posObject; */
+	private float LeftDis;
+	private float CenterDis;
+	private float RightDis;
+	private bool leftObj;
+	private bool centerObj;
+	private bool rightObj;
 
 	//These are gear ratios that are the ratios to apply the torque to the wheels for maximum realism
 	public float[] GearRatio;
@@ -61,8 +68,8 @@ public class CarControl : MonoBehaviour {
 
 	//code for self-driving of car/debugging purposes 
 	void Manual_Update() {
-		avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
-		angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
+		//avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
+		//angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
 		input_torque = Input.GetAxis("Vertical") * engineTorque * Time.deltaTime * 250.0f;
 		input_steer = Input.GetAxis("Horizontal") * maxSteer;
 
@@ -77,8 +84,15 @@ public class CarControl : MonoBehaviour {
 
 	//car driving around the waypoints
 	void AI_Update () {
-		avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
-		angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
+		//avoidObject = GetComponent<ObstacleAvoid> ().avoidObstacle;
+		//angleObject = GetComponent<ObstacleAvoid> ().angleObstacle;
+		//posObject = GetComponent<ObstacleAvoid> ().obstaclePosition;
+		leftObj = GetComponent<ObstacleAvoid> ().leftObs;
+		centerObj = GetComponent<ObstacleAvoid> ().centerObs;
+		rightObj = GetComponent <ObstacleAvoid> ().rightObs;
+		LeftDis = GetComponent <ObstacleAvoid> ().LeftDis;
+		RightDis = GetComponent<ObstacleAvoid> ().RightDis;
+		CenterDis = GetComponent <ObstacleAvoid> ().CenterDis; 
 		rb.drag = rb.velocity.magnitude / 250;
 		GoToWayPoint ();
 
@@ -144,9 +158,55 @@ public class CarControl : MonoBehaviour {
 
 	//set input_steer and input_torque to move towards the way point 
 	private void GoToWayPoint() {
-		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].x, transform.position.y, wayPoints[current_point].z));
+		/*
+		if (avoidObject) {
+			Vector3 facing = posObject - transform.position;
+			if (facing.magnitude > 5.0f) {
 
-		input_steer = travelDirection.x / travelDirection.magnitude;
+				Quaternion awayRotation = Quaternion.LookRotation(wayPoints[current_point]); 
+				transform.rotation = Quaternion.Slerp (transform.rotation, awayRotation, 15 * Time.deltaTime);
+				transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0); 
+				avoidObject = false; 	
+			}
+
+		} */
+		float steer = 0; 
+		if (leftObj && !rightObj)
+			steer = 0.35f;
+		if (rightObj && !leftObj) 
+			steer = -0.35f;
+		if (centerObj && !rightObj && !leftObj) {
+			steer = 0.35f; 
+		}
+		if (centerObj && (leftObj || rightObj)) {
+			steer = steer * 1.25f; 
+		}
+		//Vector3 newDirection = transform.InverseTransformDirection (new Vector3 (wayPoints [current_point].x, transform.position.y, wayPoints [current_point].z) - transform.position) + new Vector3(x_displacement, 0, 0); 
+		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].x, transform.position.y, wayPoints[current_point].z));
+		//Vector3 travelDirection = transform.TransformDirection (newDirection); 
+		//print ("new travel: " + travelDirection + "old travel: " + travelDirection1 + "local: " + newDirection);
+		//Debug.DrawRay (transform.position, travelDirection, Color.yellow, 0.1f);
+
+		// For skipping if waypoint behind me
+		Vector3 relPosition = transform.InverseTransformPoint (wayPoints [current_point]);
+		if (relPosition.z <= 0) {
+			int see_ahead = current_point + 1;
+			if (see_ahead >= wayPoints.Count)
+				see_ahead = 0;
+			Vector3 seeDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[see_ahead].x, transform.position.y, wayPoints[see_ahead].z));
+			if (seeDirection.z > 0) {
+				print ("Skipping waypoint");
+				current_point = see_ahead;
+				return; 
+			} 
+		} 
+		input_steer = travelDirection.x / travelDirection.magnitude + steer;
+		if (input_steer > 1) {
+			input_steer = 1;
+		} 
+		if (input_steer < -1) {
+			input_steer = -1; 
+		}
 
 		if (input_steer < 0.35f && input_steer > -0.35f) {
 			input_torque = travelDirection.z / travelDirection.magnitude;
@@ -169,13 +229,12 @@ public class CarControl : MonoBehaviour {
 		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[next_point].x, transform.position.y, wayPoints[next_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 
-		if (angle > 90.0f && rb.velocity.magnitude > 5.0f) {
-			brake_power = brakeTorque;
-			input_torque = input_torque/4;
+		if (leftObj || rightObj || centerObj) {
+			brake_power = Mathf.Abs(brakeTorque * input_torque);
 		} else {
 			brake_power = 0.0f;
 		}
-
+		print ("steer: " + input_steer + " brake: " + brake_power); 
 	}
 
 	//get each of the wheels
