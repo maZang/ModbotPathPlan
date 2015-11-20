@@ -41,6 +41,7 @@ public class CarControl : MonoBehaviour {
 	//the maximum and minimum rpm for the engine
 	public float maxEngineRPM = 3000.0f;
 	public float minEngineRPM = 1000.0f;
+	public float maxSpeed = 30f; 
 
 	// Objects holding the way points for car movement
 	public GameObject wayPointObject;
@@ -172,14 +173,14 @@ public class CarControl : MonoBehaviour {
 		} */
 		float steer = 0; 
 		if (leftObj && !rightObj)
-			steer = 0.35f;
+			steer = Mathf.Max (1.2f/LeftDis, 0.35f);
 		if (rightObj && !leftObj) 
-			steer = -0.35f;
+			steer = -1 * Mathf.Max (1.2f/RightDis, 0.35f);
 		if (centerObj && !rightObj && !leftObj) {
-			steer = 0.35f; 
+			steer = Mathf.Max (1.2f/CenterDis, 0.35f); 
 		}
 		if (centerObj && (leftObj || rightObj)) {
-			steer = steer * 1.25f; 
+			steer = steer * 1.42f; 
 		}
 		//Vector3 newDirection = transform.InverseTransformDirection (new Vector3 (wayPoints [current_point].x, transform.position.y, wayPoints [current_point].z) - transform.position) + new Vector3(x_displacement, 0, 0); 
 		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].x, transform.position.y, wayPoints[current_point].z));
@@ -202,20 +203,22 @@ public class CarControl : MonoBehaviour {
 		} 
 		input_steer = travelDirection.x / travelDirection.magnitude + steer;
 		if (input_steer > 1) {
-			input_steer = 1;
+			//input_steer = 1;
+			input_steer = Mathf.Min (input_steer, 1.25f);
 		} 
 		if (input_steer < -1) {
-			input_steer = -1; 
+			//input_steer = -1; 
+			input_steer = Mathf.Max (input_steer, -1.25f); 
 		}
 
-		if (input_steer < 0.35f && input_steer > -0.35f) {
-			input_torque = travelDirection.z / travelDirection.magnitude;
-		} else {
+
+		if ((input_steer > 0.35f || input_steer < -0.35f) && rb.velocity.magnitude > 7) {
 			input_torque = travelDirection.z / travelDirection.magnitude - Mathf.Abs (input_steer);
-		}
-
-
-		if (travelDirection.magnitude < 10) {
+		} else {
+			input_torque = travelDirection.z / travelDirection.magnitude;
+		}	
+		
+		if (travelDirection.magnitude < 12) {
 			current_point ++;
 
 			if (current_point >= wayPoints.Count) {
@@ -229,12 +232,13 @@ public class CarControl : MonoBehaviour {
 		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[next_point].x, transform.position.y, wayPoints[next_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 
-		if (leftObj || rightObj || centerObj) {
-			brake_power = Mathf.Abs(brakeTorque * input_torque);
+		if ((leftObj || rightObj || centerObj) && (input_torque > 0) && (rb.velocity.magnitude > 1)) {
+			brake_power = brakeTorque * input_torque;
 		} else {
 			brake_power = 0.0f;
 		}
-		print ("steer: " + input_steer + " brake: " + brake_power); 
+		print ("steer: " + input_steer + " brake: " + brake_power + " " + "input torque: " + input_torque); 
+		//print (rb.velocity.sqrMagnitude);
 	}
 
 	//get each of the wheels
