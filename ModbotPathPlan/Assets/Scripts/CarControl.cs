@@ -116,7 +116,8 @@ public class CarControl : MonoBehaviour {
 
 	//Path plan by determining the waypoints
 	private void PathPlan() {
-		pathPlanner = new PathPlanning();
+		GameObject pathPlanGameObject = GameObject.Find("GameMapWithNav");
+		pathPlanner = pathPlanGameObject.GetComponent<PathPlanning>();
 		print ("Start path plan");
 		pathPlanner.SetUpPathPlanning (transform.position);
 		print ("End path plan");
