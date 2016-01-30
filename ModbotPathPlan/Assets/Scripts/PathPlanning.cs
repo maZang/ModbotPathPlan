@@ -16,14 +16,15 @@ public class PathPlanning : MonoBehaviour {
 	// Use this for initialization
 	public void SetUpPathPlanning (Vector3 start) {
 		map = new GenerateGraph(start);
-		print (map.ToStringWithNeighbors());
-		print (map.nodes.Count);
+		//print (map.ToStringWithNeighbors());
+		//print (map.nodes.Count);
 		determinePath(map.startNode, map.endNode);
 	}
 
 	//draw nodes as spheres for debugging purposes
-	/*
+
 	public void OnDrawGizmosSelected() {
+		print (map.meshTriangles);
 		foreach (Triangle triangle in map.meshTriangles) {
 			Gizmos.color = new Color(2f, 2f, 2f);
 			Gizmos.DrawSphere (triangle.Centroid(), 0.3f);
@@ -36,7 +37,7 @@ public class PathPlanning : MonoBehaviour {
 			Gizmos.DrawSphere (triangle.vertex3, 0.2f);
 		}
 	}
-	*/
+
 
 	// <summary>
 	// Given two Node objects, determines a path between the startNode and the endNode

@@ -175,7 +175,7 @@ public class GenerateGraph {
 			triangle = new Triangle(pos, pos, pos, 1.0f);
 			neighbors = new List<Node>();
 			neighbors.Add (n); 
-			Debug.Log(n.triangle.Centroid ()); 
+			//Debug.Log(n.triangle.Centroid ()); 
 			priority = 0;
 		}
 
