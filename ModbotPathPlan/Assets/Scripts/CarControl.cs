@@ -123,7 +123,7 @@ public class CarControl : MonoBehaviour {
 		print ("End path plan");
 		wayPoints = new List<Vector3> ();
 		foreach (GenerateGraph.Node pathNode in pathPlanner.path) { 
-			wayPoints.Add(pathNode.triangle.Centroid());
+			wayPoints.Add(pathNode.point);
 		}
 	}
 

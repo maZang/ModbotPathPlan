@@ -18,6 +18,8 @@ public class PathPlanning : MonoBehaviour {
 		map = new GenerateGraph(start);
 		//print (map.ToStringWithNeighbors());
 		//print (map.nodes.Count);
+		print("Start Node: " + map.startNode.point.ToString());
+		print("End Node: " + map.endNode.point.ToString ());
 		determinePath(map.startNode, map.endNode);
 	}
 
@@ -63,13 +65,15 @@ public class PathPlanning : MonoBehaviour {
 
 		while (pq.getSize() > 0) {
 			current = pq.dequeue();
-			print ("Current Node: " + nodeToId[current]);
+			print(current.point.ToString());
+			print("Neighbor Count: " + current.neighbors.Count);
 			if (current.Equals(endNode)) {
-				print ("Reached End. End Node: " + endNode.triangle.ToString () + " Came From: " + came_from[endNode].triangle.ToString());
+				print ("True");
 				break;
 			}
 
 			for (int i = 0; i < current.neighbors.Count; i++) {
+				print("Current Neighbor: " + current.neighbors[i].point.ToString());
 				float new_cost = cost_so_far[current] + 
 					distanceBetweenNodes(current, current.neighbors[i]);
 				if (cost_so_far.ContainsKey(current.neighbors[i]) == false ||
@@ -77,7 +81,6 @@ public class PathPlanning : MonoBehaviour {
 					cost_so_far[current.neighbors[i]] = new_cost;
 					current.neighbors[i].priority = new_cost;
 					pq.queue(current.neighbors[i]);
-					print ("Added New Node: " + nodeToId[current.neighbors[i]] + " Priority: " + current.neighbors[i].priority);
 					came_from[current.neighbors[i]] = current;
 				}
 			}
@@ -104,7 +107,7 @@ public class PathPlanning : MonoBehaviour {
 	// </summary>
 	public void printPath() {
 		for (int i = 0; i < path.Count; i++) {
-			print(path[i].triangle.ToString() + "\n");
+			print(path[i].point.ToString() + "\n");
 		}
 	}
 
@@ -115,7 +118,7 @@ public class PathPlanning : MonoBehaviour {
 	// <param name="n1"> the first given Node </param>
 	// <param name="n2"> the second given Node </param>
 	public float distanceBetweenNodes(GenerateGraph.Node n1, GenerateGraph.Node n2) {
-		return Vector3.Distance(n1.triangle.Centroid (), n2.triangle.Centroid());
+		return Vector3.Distance(n1.point, n2.point);
 	}
  
 

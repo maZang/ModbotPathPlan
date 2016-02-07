@@ -25,8 +25,10 @@ public class GenerateGraph {
 		Dictionary<string, Node> sideToNode = new Dictionary<string, Node>();
 		//will contain mapping from a Node to the list of Triangles that contain that Node on a side
 		Dictionary<Node, List<Triangle>> nodeToTriangles = new Dictionary<Node, List<Triangle>>();
-
 		nodes = new List<Node>();
+		//will contain a mapping from Vector3 coordinates (ex: (1,2,3) will be represented as "1,2,3") to 
+		//a Node
+		Dictionary<string, Node> coordinatesToNode = new Dictionary<string, Node>();
 
 		//Made sure nav mesh indices is a multiple of 3
 		for (int i = 0; i < navmesh.indices.Length / 3; i++) {
@@ -53,18 +55,15 @@ public class GenerateGraph {
 				                              (bisect1.z + currentFirst.z)/2);
 				Vector3 bisect3 = new Vector3((bisect1.x + currentSecond.x)/2, (bisect1.y + currentSecond.y)/2,
 				                              (bisect1.z + currentSecond.z)/2);
-				Node bisect1Node = new Node(bisect1);
-				bisect1Node.laneType = "middle";
-				Node bisect2Node = new Node(bisect2);
-				bisect2Node.laneType = "outer";
-				Node bisect3Node = new Node(bisect3);
-				bisect3Node.laneType = "outer";
+				Node bisect1Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect1, "middle");
+				Node bisect2Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect2, "outer");
+				Node bisect3Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect3, "outer");
 				AddToDictionary(ref nodeToTriangles, bisect1Node, meshTriangles[i]);
 				AddToDictionary(ref nodeToTriangles, bisect2Node, meshTriangles[i]);
 				AddToDictionary(ref nodeToTriangles, bisect3Node, meshTriangles[i]);
-				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " middle", bisect1Node);
-				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " outer1", bisect2Node);
-				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " outer2", bisect3Node);
+				sideToNode[GetPairString(currentFirst, currentSecond) + " middle"] = bisect1Node;
+				sideToNode[GetPairString(currentFirst, currentSecond) + " outer1"] = bisect2Node;
+				sideToNode[GetPairString(currentFirst, currentSecond) + " outer2"] = bisect3Node;
 			}
 		}
 
@@ -94,7 +93,35 @@ public class GenerateGraph {
 		//set start node of the car
 		startNode = getClosestNode(start);
 		//set end node of the car
-		endNode = nodes[10];
+		endNode = nodes[30];
+	}
+
+	// <summary>
+	// Returns the node that corresponds to the coordinates of the given Vector3. Checks
+	// for the node corresponding to the key constructured from the coordinates in the 
+	// coordinatesToNode dictionary; if not in the dictionary, creates the node and adds
+	// it to the dictionary.
+	// </summary>
+	// <param name="coordinatesToNode"> 
+	// dictionary containing mappings from the coordinates of a Vector3 to the corresponding
+	// node
+	// </param>
+	// <param name="givenVector"> a Vector3</param>
+	// <param name="laneType"> 
+	// the lane type of the node if creating it is necessary ("middle" or "outer") 
+	// </param>
+	public Node getNodeWithVectorCoordinates(ref Dictionary<string, Node> coordinatesToNode,  
+	Vector3 givenVector, string laneType) {
+		string vectorKey = givenVector.x + "," + givenVector.y + "," + givenVector.z;
+		Node nodeOfVector;
+		if (coordinatesToNode.ContainsKey(vectorKey)) {
+			nodeOfVector = coordinatesToNode[vectorKey];
+		} else {
+			nodeOfVector = new Node(givenVector);
+			nodeOfVector.laneType = laneType;
+			coordinatesToNode.Add(vectorKey, nodeOfVector);
+		}
+		return nodeOfVector;
 	}
 
 	// <summary>
@@ -127,7 +154,8 @@ public class GenerateGraph {
 	// <param name="first"> the first Vector3 point </param>
 	// <param name="second"> the second Vector3 point </param>
 	// <param name="laneName"> the lane name ("middle", "outer1", or "outer2" </param>
-	public void addNodeNeighbor(Dictionary<string, Node> sideToNode, ref Node givenNode, Vector3 first, Vector3 second, string laneName) {
+	public void addNodeNeighbor(Dictionary<string, Node> sideToNode, ref Node givenNode, 
+	Vector3 first, Vector3 second, string laneName) {
 		if (sideToNode.ContainsKey(GetPairString (first, second) + " " + laneName)) {
 			Node neighbor = sideToNode[GetPairString (first, second) + " " + laneName];
 			if (neighbor != givenNode) {
@@ -198,7 +226,7 @@ public class GenerateGraph {
 	public override string ToString() {
 		string return_string = "";
 		foreach (Node node in nodes) {
-			 return_string += "\n" + (node.triangle.ToString());
+			 return_string += "\n" + (node.point.ToString());
 		}
 		return return_string;
 	}
