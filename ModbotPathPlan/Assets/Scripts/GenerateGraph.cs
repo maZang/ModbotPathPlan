@@ -8,54 +8,87 @@ public class GenerateGraph {
 	public List<Node> nodes; //a Node contains a triangle and adjacent Nodes
 	public Node startNode;
 	public Node endNode;
+	public NavMeshTriangulation navmesh;
 
 	public GenerateGraph(Vector3 start) {
 
 		//get nav mesh characteristics from pre-made nav mesh. Will write script later that generates 
 		//a nav-mesh for any map.
-		NavMeshTriangulation navmesh = NavMesh.CalculateTriangulation ();
+		navmesh = NavMesh.CalculateTriangulation();
 
 		//initialize triangles array
 		meshTriangles = new Triangle[navmesh.indices.Length/3];
 
-		//will contain mapping from Vector3 pair represented with the string (ex: (1,2,3) and (4,5,6)
-		//will be respresented as "1,2,3 - 4,5,6" with the smaller Vector3 coming first) to the list
-		//of nodes that have that pair as a side. Used for calculating neighbors of a node.
-		Dictionary<string, List<Node>> pairToNodes =
-			new Dictionary<string, List<Node>>();
+		//will contain mapping from a string containing the Vector3 pair side and the lane type of a node(ex: (1,2,3) and (4,5,6)
+		//in "middle" will be respresented as "1,2,3 - 4,5,6 middle" with the smaller Vector3 coming first) to the node on that
+		//side with that lane type.
+		Dictionary<string, Node> sideToNode = new Dictionary<string, Node>();
+		//will contain mapping from a Node to the list of Triangles that contain that Node on a side
+		Dictionary<Node, List<Triangle>> nodeToTriangles = new Dictionary<Node, List<Triangle>>();
 
 		nodes = new List<Node>();
 
 		//Made sure nav mesh indices is a multiple of 3
 		for (int i = 0; i < navmesh.indices.Length / 3; i++) {
+			Vector3[] currentVectors = new Vector3[3];
 			Vector3 v1 = navmesh.vertices[navmesh.indices[i*3]];
 			Vector3 v2 = navmesh.vertices[navmesh.indices[i*3 + 1]];
 			Vector3 v3 = navmesh.vertices[navmesh.indices[i*3 + 2]];
 			meshTriangles[i] = new Triangle(v1, v2, v3, NavMesh.GetAreaCost(navmesh.areas[i]));
-			Node currentNode = new Node(meshTriangles[i]);
-			nodes.Add(currentNode);
-			AddToDictionary(ref pairToNodes, GetPairString(v1, v2), currentNode);
-			AddToDictionary(ref pairToNodes, GetPairString(v2, v3), currentNode);
-			AddToDictionary(ref pairToNodes, GetPairString(v1, v3), currentNode);
+
+			List<Vector3Pair> trianglePairs = new List<Vector3Pair>();
+			//Add the pair v1, v2 to trianglePairs
+			trianglePairs.Add(new Vector3Pair(v1, v2));
+			//Add the pair v2, v3 trianglePairs
+			trianglePairs.Add(new Vector3Pair(v2, v3));
+			//Add the pair v1, v3
+			trianglePairs.Add(new Vector3Pair(v1, v3));
+			//Calculate bisections. Needed to generate smoother paths
+			foreach (Vector3Pair currentVector3Pair in trianglePairs) {
+				Vector3 currentFirst = currentVector3Pair.first;
+				Vector3 currentSecond = currentVector3Pair.second;
+				Vector3 bisect1 = new Vector3((currentFirst.x + currentSecond.x)/2, (currentFirst.y + currentSecond.y)/2,
+				                              (currentFirst.z + currentSecond.z)/2);
+				Vector3 bisect2 = new Vector3((bisect1.x + currentFirst.x)/2, (bisect1.y + currentFirst.y)/2,
+				                              (bisect1.z + currentFirst.z)/2);
+				Vector3 bisect3 = new Vector3((bisect1.x + currentSecond.x)/2, (bisect1.y + currentSecond.y)/2,
+				                              (bisect1.z + currentSecond.z)/2);
+				Node bisect1Node = new Node(bisect1);
+				bisect1Node.laneType = "middle";
+				Node bisect2Node = new Node(bisect2);
+				bisect2Node.laneType = "outer";
+				Node bisect3Node = new Node(bisect3);
+				bisect3Node.laneType = "outer";
+				AddToDictionary(ref nodeToTriangles, bisect1Node, meshTriangles[i]);
+				AddToDictionary(ref nodeToTriangles, bisect2Node, meshTriangles[i]);
+				AddToDictionary(ref nodeToTriangles, bisect3Node, meshTriangles[i]);
+				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " middle", bisect1Node);
+				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " outer1", bisect2Node);
+				sideToNode.Add(GetPairString(currentFirst, currentSecond) + " outer2", bisect3Node);
+			}
 		}
 
 		//set neighbors of each node
-		for (int j = 0; j < nodes.Count; j++) {
-			Triangle currentTriangle = nodes[j].triangle;
-			string[] keys = new string[3];
-			keys[0] = GetPairString(currentTriangle.vertex1, currentTriangle.vertex2);
-			keys[1] = GetPairString(currentTriangle.vertex2, currentTriangle.vertex3);
-			keys[2] = GetPairString(currentTriangle.vertex1, currentTriangle.vertex3);
-			for (int k = 0; k < keys.Length; k++) {
-				if (pairToNodes.ContainsKey(keys[k]) && pairToNodes[keys[k]].Count > 1) {
-					for (int l = 0; l < pairToNodes[keys[k]].Count; l++) {
-						if (((pairToNodes[keys[k]][l]).Equals(nodes[j])) == false) {
-							nodes[j].neighbors.Add(pairToNodes[keys[k]][l]);
-							break;
-						}
+		foreach (var item in nodeToTriangles) {
+			Node currentNode = item.Key;
+			//iterate through all triangles that contain the currentNode on a side
+			foreach (Triangle t in item.Value) {
+				List<Vector3Pair> trianglePairs = new List<Vector3Pair>();
+				trianglePairs.Add(new Vector3Pair(t.vertex1, t.vertex2));
+				trianglePairs.Add(new Vector3Pair(t.vertex2, t.vertex3));
+				trianglePairs.Add(new Vector3Pair(t.vertex1, t.vertex3));
+				foreach (Vector3Pair trianglePair in trianglePairs) {
+					Vector3 currentFirst = trianglePair.first;
+					Vector3 currentSecond = trianglePair.second;
+					if (currentNode.laneType == "middle") {
+						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "middle");
+					} else {
+						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer1");
+						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer2");
 					}
 				}
 			}
+			nodes.Add(currentNode);
 		}
 
 		//set start node of the car
@@ -64,11 +97,15 @@ public class GenerateGraph {
 		endNode = nodes[10];
 	}
 
+	// <summary>
+	// Given a Vector3 pos, returns the Node in the list of Nodes that is closest to it.
+	// </summary>
+	// <param name="pos"> a Vector3 </param>
 	public Node getClosestNode(Vector3 pos) {
 		float minimumDistance = Mathf.Infinity; 
 		Node closestNode = null; 
 		foreach (Node node in nodes) {
-			float distance = Vector3.Distance(node.triangle.Centroid (), pos);
+			float distance = Vector3.Distance(node.point, pos);
 			if (distance < minimumDistance) {
 				closestNode = node; 
 				minimumDistance = distance; 
@@ -77,25 +114,47 @@ public class GenerateGraph {
 		return closestNode; 
 	}
 
-
 	// <summary>
-	// Given a dictionary that maps a string representing a Vector3 pair
-	// to the list of nodes that have that pair as a side, key, and value,
-	// add the value to the list of nodes that the key currently maps to
+	// Adds a neighbor to a given Node. The value of the neighbor is constructed from the
+	// sideToNode dictionary that is passed in; the dictionary requires a key specified
+	// by two Vector3 points and a laneName
+	// </summary>
+	// <param name="sideToNode">
+	// Maps a key specified by two Vector3 points (to specify a side) and a 
+	// laneName ("middle", "outer1", or "outer2") to a Node
+	// </param>
+	// <param name="givenNode"> a Node to add a neighbor to </param>
+	// <param name="first"> the first Vector3 point </param>
+	// <param name="second"> the second Vector3 point </param>
+	// <param name="laneName"> the lane name ("middle", "outer1", or "outer2" </param>
+	public void addNodeNeighbor(Dictionary<string, Node> sideToNode, ref Node givenNode, Vector3 first, Vector3 second, string laneName) {
+		if (sideToNode.ContainsKey(GetPairString (first, second) + " " + laneName)) {
+			Node neighbor = sideToNode[GetPairString (first, second) + " " + laneName];
+			if (neighbor != givenNode) {
+				givenNode.neighbors.Add (neighbor);
+			}
+		}
+	}
+	
+	
+	// <summary>
+	// Given a dictionary that maps a Node to the list of Triangles that contain 
+	// that Node on a side, add the value to the list of Triangles that the key 
+	// currently maps to
 	// </summary>
 	// <param name="dict"> 
-	// the dictionary that maps a string representing a Vector3 pair
-	// to the list of nodes that have that pair as a side
+	// the dictionary that maps a Node to the list of Triangles that contain 
+	// that Node on a side
 	// </param>
-	// <param name="key"> a string representing a Vector3 pair </param>
-	// <param name="value"> a Node to add to the list of nodes that the key currently maps to </param>
-	public void AddToDictionary(ref Dictionary<string, List<Node>> dict, string key, Node value) {
+	// <param name="key"> a Node </param>
+	// <param name="value"> a Triangle to add to the list of Triangles that the key currently maps to </param>
+	public void AddToDictionary(ref Dictionary<Node, List<Triangle>> dict, Node key, Triangle value) {
 		if (dict.ContainsKey (key)) {
-			List<Node> currentNodes = dict[key];
+			List<Triangle> currentNodes = dict[key];
 			currentNodes.Add(value);
 			dict[key] = currentNodes;
 		} else {
-			List<Node> newNodes = new List<Node>();
+			List<Triangle> newNodes = new List<Triangle>();
 			newNodes.Add(value);
 			dict.Add(key, newNodes);
 		}
@@ -161,18 +220,20 @@ public class GenerateGraph {
 	}
 
 	public class Node : System.IComparable {
-		public Triangle triangle;
-		public List<Node> neighbors;
-		public float priority;
+		public Vector3 point; //the Vector3 representing the location of the node
+		public List<Node> neighbors; //The neighbors of the node
+		public float priority; //represents the priority for the node in the priority queue of Dijkstra
+		public string laneType; //the lane type: "middle" or "outer" in order to 
+								//allow for multiple lanes
 
-		public Node(Triangle t) {
-			triangle = t;
-			neighbors = new List<Node>();
+		public Node(Vector3 point) {
+			this.point = point;
+			this.neighbors = new List<Node>();
 			priority = 0;
 		}
 
-		public Node(Vector3 pos, Node n) {
-			triangle = new Triangle(pos, pos, pos, 1.0f);
+		public Node(Vector3 point, Node n) {
+			this.point = point;
 			neighbors = new List<Node>();
 			neighbors.Add (n); 
 			//Debug.Log(n.triangle.Centroid ()); 
@@ -186,4 +247,14 @@ public class GenerateGraph {
 
 	}
 
+	public class Vector3Pair {
+		public Vector3 first; //represents the first Vector3 in the Vector3Pair
+		public Vector3 second; //represents the second Vector3 in the Vector3Pair
+
+		public Vector3Pair(Vector3 first, Vector3 second) {
+			this.first = first;
+			this.second = second;
+		}
+	}
+			
 }

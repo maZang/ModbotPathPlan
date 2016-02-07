@@ -22,7 +22,7 @@ public class PathPlanning : MonoBehaviour {
 	}
 
 	//draw nodes as spheres for debugging purposes
-
+	/*
 	public void OnDrawGizmosSelected() {
 		print (map.meshTriangles);
 		foreach (Triangle triangle in map.meshTriangles) {
@@ -37,6 +37,7 @@ public class PathPlanning : MonoBehaviour {
 			Gizmos.DrawSphere (triangle.vertex3, 0.2f);
 		}
 	}
+	*/
 
 
 	// <summary>

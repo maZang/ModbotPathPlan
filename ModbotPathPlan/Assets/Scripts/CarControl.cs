@@ -262,6 +262,20 @@ public class CarControl : MonoBehaviour {
 				Gizmos.DrawLine (point, wayPoints[x]);
 			}
 		}
+
+		for (int i = 0; i < pathPlanner.map.meshTriangles.Length; i++) {
+			Triangle currentTriangle = pathPlanner.map.meshTriangles[i];
+			Gizmos.color = Color.red;
+			Gizmos.DrawSphere (currentTriangle.vertex1, 0.3f);
+			Gizmos.color = Color.green;
+			Gizmos.DrawSphere (currentTriangle.vertex2, 0.3f);
+			Gizmos.color = Color.blue;
+			Gizmos.DrawSphere (currentTriangle.vertex3, 0.3f);
+			Gizmos.color = Color.black;
+			Gizmos.DrawLine	(currentTriangle.vertex1, currentTriangle.vertex2);
+			Gizmos.DrawLine	(currentTriangle.vertex2, currentTriangle.vertex3);
+			Gizmos.DrawLine	(currentTriangle.vertex1, currentTriangle.vertex3);
+		}
 	}
 
 }
