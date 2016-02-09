@@ -93,7 +93,15 @@ public class GenerateGraph {
 		//set start node of the car
 		startNode = getClosestNode(start);
 		//set end node of the car
-		endNode = nodes[30];
+		int possible_end_node = 900;
+		while (true) {
+			if (nodes[possible_end_node].laneType == startNode.laneType) {
+				endNode = nodes[possible_end_node];
+				break;
+			} else {
+				possible_end_node = possible_end_node + 1;
+			}
+		}
 	}
 
 	// <summary>

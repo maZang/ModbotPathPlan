@@ -19,6 +19,7 @@ public class PathPlanning : MonoBehaviour {
 		//print (map.ToStringWithNeighbors());
 		//print (map.nodes.Count);
 		print("Start Node: " + map.startNode.point.ToString());
+		print ("Node Count: " + map.nodes.Count);
 		print("End Node: " + map.endNode.point.ToString ());
 		determinePath(map.startNode, map.endNode);
 	}
