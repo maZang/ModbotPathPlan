@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 
 Project("{B62C1068-0899-5541-097E-48F85459C769}") = "ModbotPathPlan", "Assembly-CSharp-vs.csproj", "{6568ABBE-B1B1-454F-D513-1849D0433723}"
 EndProject
+Project("{B62C1068-0899-5541-097E-48F85459C769}") = "ModbotPathPlan", "Assembly-CSharp-Editor-vs.csproj", "{80F4F8E8-9C22-CAF1-84B1-D7C9E5352458}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,11 +15,15 @@ Global
 		{6568ABBE-B1B1-454F-D513-1849D0433723}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6568ABBE-B1B1-454F-D513-1849D0433723}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6568ABBE-B1B1-454F-D513-1849D0433723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80F4F8E8-9C22-CAF1-84B1-D7C9E5352458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80F4F8E8-9C22-CAF1-84B1-D7C9E5352458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80F4F8E8-9C22-CAF1-84B1-D7C9E5352458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80F4F8E8-9C22-CAF1-84B1-D7C9E5352458}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-																							GlobalSection(MonoDevelopProperties) = preSolution
+																																							GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

@@ -25,9 +25,9 @@ public class PathPlanning : MonoBehaviour {
 	}
 
 	//draw nodes as spheres for debugging purposes
-	/*
-	public void OnDrawGizmosSelected() {
-		print (map.meshTriangles);
+
+	//visualizing the navmesh
+	/* public void OnDrawGizmosSelected() {
 		foreach (Triangle triangle in map.meshTriangles) {
 			Gizmos.color = new Color(2f, 2f, 2f);
 			Gizmos.DrawSphere (triangle.Centroid(), 0.3f);
@@ -39,9 +39,26 @@ public class PathPlanning : MonoBehaviour {
 			Gizmos.DrawSphere (triangle.vertex2, 0.2f);
 			Gizmos.DrawSphere (triangle.vertex3, 0.2f);
 		}
-	}
-	*/
-
+	} */
+	// visualizing the nodes 
+	public void OnDrawGizmosSelected() {
+		print (map.meshTriangles);
+		foreach (GenerateGraph.Node node in map.nodes) {
+			if (node.laneType == "middle") {
+				Gizmos.color = Color.red;
+			} else if (node.laneType == "outer") {
+				Gizmos.color = Color.blue;
+			}
+			else {
+				Gizmos.color = Color.black;
+			}
+			Gizmos.DrawSphere (node.point, 0.3f);
+			foreach (GenerateGraph.Node neighbor in node.neighbors) {
+				Gizmos.DrawLine (node.point, neighbor.point);
+			}; 
+		}
+	} 
+	
 
 	// <summary>
 	// Given two Node objects, determines a path between the startNode and the endNode

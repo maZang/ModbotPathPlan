@@ -65,6 +65,11 @@ public class GenerateGraph {
 				sideToNode[GetPairString(currentFirst, currentSecond) + " outer1"] = bisect2Node;
 				sideToNode[GetPairString(currentFirst, currentSecond) + " outer2"] = bisect3Node;
 			}
+			Vector3 currentCentroid = meshTriangles[i].Centroid ();
+			Node centroidNode = getNodeWithVectorCoordinates(ref coordinatesToNode, currentCentroid, "middle");
+			AddToDictionary(ref nodeToTriangles, centroidNode, meshTriangles[i]);
+			sideToNode[GetPairString (currentCentroid, currentCentroid) + " middle"] = centroidNode;
+
 		}
 
 		//set neighbors of each node
@@ -94,14 +99,15 @@ public class GenerateGraph {
 		startNode = getClosestNode(start);
 		//set end node of the car
 		int possible_end_node = 900;
-		while (true) {
+		endNode = getClosestNode (GameObject.Find ("FinishLine").transform.position);
+		/*while (true) {
 			if (nodes[possible_end_node].laneType == startNode.laneType) {
 				endNode = nodes[possible_end_node];
 				break;
 			} else {
 				possible_end_node = possible_end_node + 1;
 			}
-		}
+		}*/
 	}
 
 	// <summary>
@@ -140,6 +146,9 @@ public class GenerateGraph {
 		float minimumDistance = Mathf.Infinity; 
 		Node closestNode = null; 
 		foreach (Node node in nodes) {
+			if (node.laneType != "outer") {
+				continue;
+			}
 			float distance = Vector3.Distance(node.point, pos);
 			if (distance < minimumDistance) {
 				closestNode = node; 
