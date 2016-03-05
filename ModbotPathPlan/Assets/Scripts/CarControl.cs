@@ -126,10 +126,8 @@ public class CarControl : MonoBehaviour {
 		foreach (GenerateGraph.Node pathNode in pathPlanner.path) { 
 			wayPoints.Add(pathNode.point);
 		}
-		//Initalize the Kart object
-		kart = pathPlanGameObject.GetComponent<Kart> ();
-		kart.SetUpKart (wayPoints, 0);
 	}
+	\
 
 	//get the way points from the in game object
 	/*private void GetWayPoints() {
