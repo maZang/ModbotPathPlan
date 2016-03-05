@@ -127,7 +127,6 @@ public class CarControl : MonoBehaviour {
 			wayPoints.Add(pathNode.point);
 		}
 	}
-	\
 
 	//get the way points from the in game object
 	/*private void GetWayPoints() {
