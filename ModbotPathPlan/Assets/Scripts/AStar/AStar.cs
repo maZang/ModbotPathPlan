@@ -18,9 +18,9 @@ namespace AStar {
 			PriorityQueue<Node> open = new PriorityQueue<Node>(graph.Size());
 			HashSet<Node> closed = new HashSet<Node>();
 			Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
-			Dictionary<Node, float> current_cost_start = new Dictionary<Node, float>();
+			Dictionary<Node, float> cost_so_far = new Dictionary<Node, float>();
 			came_from.Add(startNode, null);
-			current_cost_start.Add(startNode, 0);
+			cost_so_far.Add(startNode, 0);
 			open.queue(heuristic.Estimate(startNode), startNode);
 
 			while (open.getSize() > 0) {
@@ -37,29 +37,27 @@ namespace AStar {
 						continue;
 					}
 
-					float g_score = current_cost_start[current] + Node.distanceBetweenNodes(current, n);
-					float h_score = heuristic.Estimate(n);
-					float f_score = g_score + h_score;
+					float graph_cost = cost_so_far[current] + Node.distanceBetweenNodes(current, n);
 
-					if (current_cost_start.ContainsKey(n)) {
-						if (current_cost_start[n] >= g_score) {
-							open.queue(f_score, n);
-						}
-					} else {
-						open.queue(f_score, n);
+					if (cost_so_far.ContainsKey(n) == false ||  graph_cost < cost_so_far[n]) {
+						cost_so_far[n] = graph_cost;
+						float priority = graph_cost + heuristic.Estimate(n);
+						open.queue(priority, n);
+						came_from[n] = current;
 					}
-					came_from[n] = current;
-					current_cost_start[n] = g_score;
 				}
 			}
 
-			Node backtracker = graph.endNode;
+			//Put nodes of the path into the list
 			List<Node> path = new List<Node> ();
-			while (came_from.ContainsKey(backtracker)) {
-				path.Insert (0, backtracker);
+			Node currentNode = graph.endNode;
+			path.Add (currentNode);
+			while (currentNode.Equals(startNode) == false) {
+				currentNode = came_from[currentNode];
+				path.Add (currentNode);
 			}
+			path.Reverse();
 			return path;
-
 		}
 
 	}
