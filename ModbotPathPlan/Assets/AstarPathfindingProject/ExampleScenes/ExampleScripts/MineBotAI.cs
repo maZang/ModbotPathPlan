@@ -117,7 +117,7 @@ namespace Pathfinding {
 			Vector3 relVelocity = tr.InverseTransformDirection (velocity);
 			relVelocity.y = 0;
 			
-			if (velocity.sqrMagnitude <= sleepVelocity*sleepVelocity) {
+			/*if (velocity.sqrMagnitude <= sleepVelocity*sleepVelocity) {
 				//Fade out walking animation
 				anim.Blend ("forward",0,0.2F);
 			} else {
@@ -129,7 +129,7 @@ namespace Pathfinding {
 				
 				float speed = relVelocity.z;
 				state.speed = speed*animationSpeed;
-			}
+			} */
 		}
 	}
 }

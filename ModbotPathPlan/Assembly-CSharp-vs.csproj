@@ -124,9 +124,16 @@
      <Compile Include="Assets\EasyRoads3D Free\scripts\SideObjectInit.cs" />
      <Compile Include="Assets\EasyRoads3D Free\scripts\SurfaceScript.cs" />
      <Compile Include="Assets\EasyRoads3D Free\scripts\sideObjectScript.cs" />
+     <Compile Include="Assets\Scripts\AStar\AStar.cs" />
+     <Compile Include="Assets\Scripts\AStar\Graph.cs" />
+     <Compile Include="Assets\Scripts\AStar\Heuristic.cs" />
+     <Compile Include="Assets\Scripts\AStar\Node.cs" />
+     <Compile Include="Assets\Scripts\AStar\PriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\AStar\Triangle.cs" />
      <Compile Include="Assets\Scripts\CarControl.cs" />
      <Compile Include="Assets\Scripts\CarController.cs" />
      <Compile Include="Assets\Scripts\GenerateGraph.cs" />
+     <Compile Include="Assets\Scripts\Kart.cs" />
      <Compile Include="Assets\Scripts\ObstacleAvoid.cs" />
      <Compile Include="Assets\Scripts\PathPlanning.cs" />
      <Compile Include="Assets\Scripts\PriorityQueue.cs" />
