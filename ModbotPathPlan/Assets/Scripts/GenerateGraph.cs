@@ -1,23 +1,18 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class GenerateGraph {
 
-	public Triangle[] meshTriangles;
-	public List<Node> nodes; //a Node contains a triangle and adjacent Nodes
-	public Node startNode;
+	private List<Node> nodes;
 	public Node endNode;
-	public NavMeshTriangulation navmesh;
 
-	public GenerateGraph(Vector3 start) {
-
+	public GenerateGraph() {
 		//get nav mesh characteristics from pre-made nav mesh. Will write script later that generates 
 		//a nav-mesh for any map.
-		navmesh = NavMesh.CalculateTriangulation();
-
+		NavMeshTriangulation navmesh = NavMesh.CalculateTriangulation();
 		//initialize triangles array
-		meshTriangles = new Triangle[navmesh.indices.Length/3];
+		Triangle[] meshTriangles = new Triangle[navmesh.indices.Length/3];
 
 		//will contain mapping from a string containing the Vector3 pair side and the lane type of a node(ex: (1,2,3) and (4,5,6)
 		//in "middle" will be respresented as "1,2,3 - 4,5,6 middle" with the smaller Vector3 coming first) to the node on that
@@ -55,9 +50,9 @@ public class GenerateGraph {
 				                              (bisect1.z + currentFirst.z)/2);
 				Vector3 bisect3 = new Vector3((bisect1.x + currentSecond.x)/2, (bisect1.y + currentSecond.y)/2,
 				                              (bisect1.z + currentSecond.z)/2);
-				Node bisect1Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect1, "middle");
-				Node bisect2Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect2, "outer");
-				Node bisect3Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect3, "outer");
+				Node bisect1Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect1);
+				Node bisect2Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect2);
+				Node bisect3Node = getNodeWithVectorCoordinates(ref coordinatesToNode, bisect3);
 				AddToDictionary(ref nodeToTriangles, bisect1Node, meshTriangles[i]);
 				AddToDictionary(ref nodeToTriangles, bisect2Node, meshTriangles[i]);
 				AddToDictionary(ref nodeToTriangles, bisect3Node, meshTriangles[i]);
@@ -66,7 +61,7 @@ public class GenerateGraph {
 				sideToNode[GetPairString(currentFirst, currentSecond) + " outer2"] = bisect3Node;
 			}
 			Vector3 currentCentroid = meshTriangles[i].Centroid ();
-			Node centroidNode = getNodeWithVectorCoordinates(ref coordinatesToNode, currentCentroid, "middle");
+			Node centroidNode = getNodeWithVectorCoordinates(ref coordinatesToNode, currentCentroid);
 			AddToDictionary(ref nodeToTriangles, centroidNode, meshTriangles[i]);
 			sideToNode[GetPairString (currentCentroid, currentCentroid) + " middle"] = centroidNode;
 
@@ -84,30 +79,17 @@ public class GenerateGraph {
 				foreach (Vector3Pair trianglePair in trianglePairs) {
 					Vector3 currentFirst = trianglePair.first;
 					Vector3 currentSecond = trianglePair.second;
-					if (currentNode.laneType == "middle") {
-						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "middle");
-					} else {
-						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer1");
-						addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer2");
-					}
+					Vector3 currentCentroid = t.Centroid();
+					addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "middle");
+					addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer1");
+					addNodeNeighbor(sideToNode, ref currentNode, currentFirst, currentSecond, "outer2");
+					addNodeNeighbor(sideToNode, ref currentNode, currentCentroid, currentCentroid, "middle");
 				}
 			}
 			nodes.Add(currentNode);
 		}
-
-		//set start node of the car
-		startNode = getClosestNode(start);
-		//set end node of the car
-		int possible_end_node = 900;
-		endNode = getClosestNode (GameObject.Find ("FinishLine").transform.position);
-		/*while (true) {
-			if (nodes[possible_end_node].laneType == startNode.laneType) {
-				endNode = nodes[possible_end_node];
-				break;
-			} else {
-				possible_end_node = possible_end_node + 1;
-			}
-		}*/
+		//set end node of the cars
+		endNode = getClosestNode (GameObject.Find("FinishLine").transform.position);
 	}
 
 	// <summary>
@@ -125,18 +107,18 @@ public class GenerateGraph {
 	// the lane type of the node if creating it is necessary ("middle" or "outer") 
 	// </param>
 	public Node getNodeWithVectorCoordinates(ref Dictionary<string, Node> coordinatesToNode,  
-	Vector3 givenVector, string laneType) {
+	Vector3 givenVector) {
 		string vectorKey = givenVector.x + "," + givenVector.y + "," + givenVector.z;
 		Node nodeOfVector;
 		if (coordinatesToNode.ContainsKey(vectorKey)) {
 			nodeOfVector = coordinatesToNode[vectorKey];
 		} else {
 			nodeOfVector = new Node(givenVector);
-			nodeOfVector.laneType = laneType;
 			coordinatesToNode.Add(vectorKey, nodeOfVector);
 		}
 		return nodeOfVector;
 	}
+
 
 	// <summary>
 	// Given a Vector3 pos, returns the Node in the list of Nodes that is closest to it.
@@ -146,10 +128,7 @@ public class GenerateGraph {
 		float minimumDistance = Mathf.Infinity; 
 		Node closestNode = null; 
 		foreach (Node node in nodes) {
-			if (node.laneType != "outer") {
-				continue;
-			}
-			float distance = Vector3.Distance(node.point, pos);
+			float distance = Vector3.Distance(node.position, pos);
 			if (distance < minimumDistance) {
 				closestNode = node; 
 				minimumDistance = distance; 
@@ -157,8 +136,7 @@ public class GenerateGraph {
 		}
 		return closestNode; 
 	}
-
-	// <summary>
+		// <summary>
 	// Adds a neighbor to a given Node. The value of the neighbor is constructed from the
 	// sideToNode dictionary that is passed in; the dictionary requires a key specified
 	// by two Vector3 points and a laneName
@@ -170,7 +148,7 @@ public class GenerateGraph {
 	// <param name="givenNode"> a Node to add a neighbor to </param>
 	// <param name="first"> the first Vector3 point </param>
 	// <param name="second"> the second Vector3 point </param>
-	// <param name="laneName"> the lane name ("middle", "outer1", or "outer2" </param>
+	// <param name="laneName"> the lane name ("middle", "outer1", or "outer2") </param>
 	public void addNodeNeighbor(Dictionary<string, Node> sideToNode, ref Node givenNode, 
 	Vector3 first, Vector3 second, string laneName) {
 		if (sideToNode.ContainsKey(GetPairString (first, second) + " " + laneName)) {
@@ -237,13 +215,17 @@ public class GenerateGraph {
 			second.y + "," + second.z;
 	}
 
+	public int Size() {
+		return nodes.Count;
+	}
+
 	// <summary>
 	// Returns a string representation of all the triangles of the nodes
 	// </summary>
 	public override string ToString() {
 		string return_string = "";
 		foreach (Node node in nodes) {
-			 return_string += "\n" + (node.point.ToString());
+			 return_string += "\n" + (node.position.ToString());
 		}
 		return return_string;
 	}
@@ -264,34 +246,6 @@ public class GenerateGraph {
 		return return_string;
 	}
 
-	public class Node : System.IComparable {
-		public Vector3 point; //the Vector3 representing the location of the node
-		public List<Node> neighbors; //The neighbors of the node
-		public float priority; //represents the priority for the node in the priority queue of Dijkstra
-		public string laneType; //the lane type: "middle" or "outer" in order to 
-								//allow for multiple lanes
-
-		public Node(Vector3 point) {
-			this.point = point;
-			this.neighbors = new List<Node>();
-			priority = 0;
-		}
-
-		public Node(Vector3 point, Node n) {
-			this.point = point;
-			neighbors = new List<Node>();
-			neighbors.Add (n); 
-			//Debug.Log(n.triangle.Centroid ()); 
-			priority = 0;
-		}
-
-		public int CompareTo(object obj) {
-			Node node2 = obj as Node;
-			return this.priority.CompareTo(node2.priority);
-		}
-
-	}
-
 	public class Vector3Pair {
 		public Vector3 first; //represents the first Vector3 in the Vector3Pair
 		public Vector3 second; //represents the second Vector3 in the Vector3Pair
@@ -301,5 +255,5 @@ public class GenerateGraph {
 			this.second = second;
 		}
 	}
-			
+		
 }
