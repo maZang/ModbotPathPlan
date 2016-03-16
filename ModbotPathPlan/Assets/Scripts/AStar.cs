@@ -5,25 +5,28 @@ using System.Collections.Generic;
 public class AStar {
 
 	public static Heuristic heuristic;
-	public static Graph graph;
+	public static GenerateGraph graph;
 
 	static AStar() {
-		graph = new Graph();
+		graph = new GenerateGraph();
 		heuristic = new Heuristic(graph);
 	}
 
 	public static List<Node> GetPath(Vector3 start) {
 		Node startNode = graph.getClosestNode(start);
-		PriorityQueue<Node> open = new PriorityQueue<Node>(graph.Size());
+		SortedList<Integer, Node> open = new SortedList<Integer,Node>();
 		HashSet<Node> closed = new HashSet<Node>();
 		Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float>();
 		came_from.Add(startNode, null);
 		cost_so_far.Add(startNode, 0);
-		open.queue(heuristic.Estimate(startNode), startNode);
+		open.Add(heuristic.Estimate(startNode), startNode);
 
-		while (open.getSize() > 0) {
-			Node current = open.dequeue();
+		while (open.Count > 0) {
+			KeyValuePair<Integer, Node> minvalues = Min (open);
+			Node current = minvalues.Value;
+			int current_key = minvalues.Key;
+
 			if (current.Equals(graph.endNode)) {
 				break;
 			}
@@ -41,7 +44,7 @@ public class AStar {
 				if (cost_so_far.ContainsKey(n) == false ||  graph_cost < cost_so_far[n]) {
 					cost_so_far[n] = graph_cost;
 					float priority = graph_cost + heuristic.Estimate(n);
-					open.queue(priority, n);
+					open.Add(priority, n);
 					came_from[n] = current;
 				}
 			}
@@ -57,6 +60,11 @@ public class AStar {
 		}
 		path.Reverse();
 		return path;
+	}
+
+	public static KeyValuePair<K, V> Min<K, V>(this SortedList<K, V> dict)
+	{
+		return new KeyValuePair<K, V>(dict.Keys[0], dict.Values[0]);
 	}
 
 }
