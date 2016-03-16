@@ -14,7 +14,7 @@ public class AStar {
 
 	public static List<Node> GetPath(Vector3 start) {
 		Node startNode = graph.getClosestNode(start);
-		SortedList<Integer, Node> open = new SortedList<Integer,Node>();
+		SortedDictionary<Integer, Node> open = new SortedDictionary<Integer,Node>();
 		HashSet<Node> closed = new HashSet<Node>();
 		Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float>();
@@ -23,9 +23,10 @@ public class AStar {
 		open.Add(heuristic.Estimate(startNode), startNode);
 
 		while (open.Count > 0) {
-			KeyValuePair<Integer, Node> minvalues = Min (open);
-			Node current = minvalues.Value;
-			int current_key = minvalues.Key;
+			var keys = open.GetEnumerator();
+			var keyNode = keys.Current;
+			Node current = keyNode.Value;
+			int current_key = keyNode.Key;
 
 			if (current.Equals(graph.endNode)) {
 				break;
@@ -60,11 +61,6 @@ public class AStar {
 		}
 		path.Reverse();
 		return path;
-	}
-
-	public static KeyValuePair<K, V> Min<K, V>(this SortedList<K, V> dict)
-	{
-		return new KeyValuePair<K, V>(dict.Keys[0], dict.Values[0]);
 	}
 
 }
