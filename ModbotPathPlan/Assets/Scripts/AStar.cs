@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 public class AStar {
 
-	public static Heuristic heuristic;
+	public static HeuristicD heuristic;
 	public static GenerateGraph graph;
 
 	static AStar() {
 		graph = new GenerateGraph();
-		heuristic = new Heuristic(graph);
+		heuristic = new HeuristicD(graph);
 	}
 
 	public static List<Node> GetPath(Vector3 start) {
 		Node startNode = graph.getClosestNode(start);
-		SortedDictionary<Integer, Node> open = new SortedDictionary<Integer,Node>();
+		SortedDictionary<float, Node> open = new SortedDictionary<float,Node>();
 		HashSet<Node> closed = new HashSet<Node>();
 		Dictionary<Node, Node> came_from = new Dictionary<Node, Node>();
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float>();
@@ -26,7 +26,7 @@ public class AStar {
 			var keys = open.GetEnumerator();
 			var keyNode = keys.Current;
 			Node current = keyNode.Value;
-			int current_key = keyNode.Key;
+			float current_key = keyNode.Key;
 
 			if (current.Equals(graph.endNode)) {
 				break;

@@ -47,8 +47,6 @@ public class CarControl : MonoBehaviour {
 	public GameObject wayPointObject;
 	private List<Vector3> wayPoints; 
 	private int current_point = 0;
-	// Represents the path planning object
-	PathPlanning pathPlanner;
 	// Represents the kart object that simulation will need to interface with path planning code
 	Kart kart;
 	//Initialize center of mass to prevent car from flipping over too much,
@@ -117,14 +115,12 @@ public class CarControl : MonoBehaviour {
 
 	//Path plan by determining the waypoints
 	private void PathPlan() {
-		GameObject pathPlanGameObject = GameObject.Find("GameMapWithNav");
-		pathPlanner = pathPlanGameObject.GetComponent<PathPlanning>();
 		print ("Start path plan");
-		pathPlanner.SetUpPathPlanning (transform.position);
+		List<Node> waypoints = AStar.GetPath (transform.position);
 		print ("End path plan");
 		wayPoints = new List<Vector3> ();
-		foreach (GenerateGraph.Node pathNode in pathPlanner.path) { 
-			wayPoints.Add(pathNode.point);
+		foreach (Node pathNode in waypoints) { 
+			wayPoints.Add(pathNode.position);
 		}
 	}
 
