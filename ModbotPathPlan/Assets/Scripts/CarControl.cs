@@ -115,12 +115,11 @@ public class CarControl : MonoBehaviour {
 
 	//Path plan by determining the waypoints
 	private void PathPlan() {
-		print ("Start path plan");
-		List<Node> waypoints = AStar.GetPath (transform.position);
-		print ("End path plan");
+		List<Node> wayPointNodes = AStar.GetPath (transform.position);
 		wayPoints = new List<Vector3> ();
-		foreach (Node pathNode in waypoints) { 
+		foreach (Node pathNode in wayPointNodes) { 
 			wayPoints.Add(pathNode.position);
+			Debug.Log (pathNode.position);
 		}
 	}
 

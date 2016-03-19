@@ -68,7 +68,7 @@ public class PriorityQueue<T> {
 		QueueObject t = new QueueObject(element, priority);
 		minHeap[++size] = t;
 		int pos = size;
-		while (pos > 1 && minHeap[pos].priority - minHeap[getParent(pos)].priority < 0) {
+		while (pos > 1 && minHeap[pos].priority < minHeap[getParent(pos)].priority) {
 			swap (pos, getParent(pos));
 			pos = getParent(pos);
 		}
