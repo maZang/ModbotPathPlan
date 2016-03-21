@@ -21,4 +21,8 @@ public class Node {
 	public static float distanceBetweenNodes(Node n1, Node n2) {
 		return Vector3.Distance(n1.position, n2.position);
 	}
+
+	public override string ToString() {
+		return position.ToString ();
+	}
 }

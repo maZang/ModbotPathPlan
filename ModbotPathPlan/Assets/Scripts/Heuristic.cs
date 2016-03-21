@@ -13,7 +13,7 @@ public class HeuristicD {
 
 		PriorityQueue<Node> pq = new PriorityQueue<Node>(graph.Size ());
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
-		Debug.Log ("Queued: " + graph.endNode);
+		Debug.Log ("Queued: " + graph.endNode.ToString());
 		pq.queue(0.0f, graph.endNode);
 		cost_so_far.Add (graph.endNode, 0.0f);
 		while (pq.getSize() > 0) {

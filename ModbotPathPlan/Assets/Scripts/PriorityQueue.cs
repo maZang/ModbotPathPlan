@@ -51,12 +51,15 @@ public class PriorityQueue<T> {
 			int leftIndex = getLeftChild(pos);
 			int rightIndex = getRightChild(pos);
 			if ((size >= leftIndex && minHeap[pos].priority > minHeap[leftIndex].priority) ||
-				(size >= rightIndex && minHeap[pos].priority > minHeap[rightIndex].priority)) {
-				swap(leftIndex, pos);
-				Heapify(leftIndex);
-			} else {
-				swap(rightIndex, pos);
-				Heapify(rightIndex);
+			(size >= rightIndex && minHeap[pos].priority > minHeap[rightIndex].priority)) {
+				if (minHeap[leftIndex].priority < minHeap[rightIndex].priority) {
+					swap(leftIndex, pos);
+					Heapify(leftIndex);
+				}
+				else {
+					swap(rightIndex, pos);
+					Heapify(rightIndex);
+				}
 			}
 		}
 	}
