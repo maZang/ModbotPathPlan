@@ -53,6 +53,7 @@
      <Compile Include="Assets\EasyRoads3D Free\scripts\sideObjectScript.cs" />
      <Compile Include="Assets\Scripts\AStar.cs" />
      <Compile Include="Assets\Scripts\CarControl.cs" />
+     <Compile Include="Assets\Scripts\DynamicPathThreadJob.cs" />
      <Compile Include="Assets\Scripts\GenerateGraph.cs" />
      <Compile Include="Assets\Scripts\Heuristic.cs" />
      <Compile Include="Assets\Scripts\Kart.cs" />
@@ -61,9 +62,11 @@
      <Compile Include="Assets\Scripts\Original\GenerateGraph.cs" />
      <Compile Include="Assets\Scripts\Original\PathPlanning.cs" />
      <Compile Include="Assets\Scripts\Original\PriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\PathPlanningDataStructures.cs" />
      <Compile Include="Assets\Scripts\PathPlanningInterface.cs" />
      <Compile Include="Assets\Scripts\PriorityQueue.cs" />
      <Compile Include="Assets\Scripts\SmoothFollow.cs" />
+     <Compile Include="Assets\Scripts\ThreadJob.cs" />
      <Compile Include="Assets\Scripts\Triangle.cs" />
      <None Include="Assets\EasyRoads3D Free\Shaders\EasyRoads3D-Surface.shader" />
      <None Include="Assets\EasyRoads3D Free\Release Notes.txt" />

@@ -42,20 +42,31 @@ public class CarControl : MonoBehaviour {
 	public float maxEngineRPM = 3000.0f;
 	public float minEngineRPM = 1000.0f;
 	public float maxSpeed = 30f; 
-
+	
 	// Objects holding the way points for car movement
 	public GameObject wayPointObject;
 	private List<Vector3> wayPoints; 
 	private int current_point = 0;
+
+	// Variables for the dynamic path creation
+	private List<Vector3> currentWayPoints = null; //waypoints of the current path
+	private List<Vector3> nextWayPoints = null; //waypoints of the next path which are calculated
+										 //in a thread
+	private bool jobInProgress = false; //indicates if a thread job is currently in progress
+	private bool pathCalculated = false; //indicates if next path segment has been calculated
+	private DynamicPathThreadJob currentThreadJob = null; //the current dyanmic path thread job
+
 	// Represents the kart object that simulation will need to interface with path planning code
 	Kart kart;
+
 	//Initialize center of mass to prevent car from flipping over too much,
 	//Path plan by calculating a graph from the map and determining the waypoints
 	void Start () {
 		rb = GetComponent<Rigidbody>();
 		rb.centerOfMass = new Vector3(0.0f,-0.3f,0.7f);
 		PathPlan();
-		//GetWayPoints ();
+		//triggers static constructor of PathPlanningDataStructures to execute
+		GenerateGraph generatedGraph = PathPlanningDataStructures.graph;
 	}
 
 	//allows for manual drive or AI pathfinding
@@ -94,6 +105,21 @@ public class CarControl : MonoBehaviour {
 		RightDis = GetComponent<ObstacleAvoid> ().RightDis;
 		CenterDis = GetComponent <ObstacleAvoid> ().CenterDis; 
 		rb.drag = rb.velocity.magnitude / 250;
+		//Check if the next path segment needs to be calculated in a thread
+		if (pathCalculated == false && jobInProgress == false) {
+			if (currentWayPoints == null) {
+				//first triggered thread job for this car
+				currentThreadJob = new DynamicPathThreadJob(PathPlanningDataStructures.graph.getClosestNode(
+					transform.position), PathPlanningDataStructures.graph.endNode);
+				currentThreadJob.Start();
+			} else {
+				//triggers thread jobs for this car when currentWayPoints is not null
+				currentThreadJob = new DynamicPathThreadJob(currentThreadJob.destinationNode, 
+				    PathPlanningDataStructures.graph.endNode);
+				currentThreadJob.Start();
+			}
+			jobInProgress = true;
+		}
 		GoToWayPoint ();
 
 		input_rpm = (GetCollider (0).rpm + GetCollider (1).rpm) / 2 * GearRatio [CurrGear];
