@@ -48,6 +48,7 @@ public class CarControl : MonoBehaviour {
 	private int current_point = 0;
 
 	// Variables for the dynamic path creation
+	private Node startNode = null; //original start node
 	private List<Vector3> currentWayPoints = null; //waypoints of the current path
 	private List<Vector3> nextWayPoints = null; //waypoints of the next path which are calculated
 										 //in a thread
@@ -107,7 +108,13 @@ public class CarControl : MonoBehaviour {
 		//Check if the next path segment needs to be calculated in a thread
 		if (pathCalculated == false && jobInProgress == false) {
 			//triggers thread jobs for this car when currentWayPoints is not null
-			currentThreadJob = new DynamicPathThreadJob(currentThreadJob.destinationNode, 
+			Node pathStartNode;
+			if (currentThreadJob.destinationNode == PathPlanningDataStructures.graph.endNode) {
+				pathStartNode = startNode;
+			} else {
+				pathStartNode = currentThreadJob.destinationNode;
+			}
+			currentThreadJob = new DynamicPathThreadJob(pathStartNode, 
 			    PathPlanningDataStructures.graph.endNode);
 			currentThreadJob.Start();
 			jobInProgress = true;
@@ -143,8 +150,8 @@ public class CarControl : MonoBehaviour {
 	//Determines the intial path segment for the car
 	private void InitialPathPlan() {
 		//first triggered thread job for this car
-		currentThreadJob = new DynamicPathThreadJob (PathPlanningDataStructures.graph.getClosestNode (
-			transform.position), PathPlanningDataStructures.graph.endNode);
+		startNode = PathPlanningDataStructures.graph.getClosestNode (transform.position);
+		currentThreadJob = new DynamicPathThreadJob (startNode, PathPlanningDataStructures.graph.endNode);
 		currentThreadJob.Start ();
 		while (true) {
 			if (currentThreadJob.isFinished()) {
