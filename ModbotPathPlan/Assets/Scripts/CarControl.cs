@@ -45,7 +45,6 @@ public class CarControl : MonoBehaviour {
 	
 	// Objects holding the way points for car movement
 	public GameObject wayPointObject;
-	private List<Vector3> wayPoints; 
 	private int current_point = 0;
 
 	// Variables for the dynamic path creation
@@ -64,9 +63,7 @@ public class CarControl : MonoBehaviour {
 	void Start () {
 		rb = GetComponent<Rigidbody>();
 		rb.centerOfMass = new Vector3(0.0f,-0.3f,0.7f);
-		PathPlan();
-		//triggers static constructor of PathPlanningDataStructures to execute
-		GenerateGraph generatedGraph = PathPlanningDataStructures.graph;
+		InitialPathPlan();
 	}
 
 	//allows for manual drive or AI pathfinding
@@ -105,6 +102,7 @@ public class CarControl : MonoBehaviour {
 		RightDis = GetComponent<ObstacleAvoid> ().RightDis;
 		CenterDis = GetComponent <ObstacleAvoid> ().CenterDis; 
 		rb.drag = rb.velocity.magnitude / 250;
+
 		//Check if the next path segment needs to be calculated in a thread
 		/*if (pathCalculated == false && jobInProgress == false) {
 			if (currentWayPoints == null) {
@@ -139,13 +137,19 @@ public class CarControl : MonoBehaviour {
 		//print (avoidObject);
 	}
 
-	//Path plan by determining the waypoints
-	private void PathPlan() {
-		List<Node> wayPointNodes = AStar.GetPath (transform.position);
-		wayPoints = new List<Vector3> ();
-		foreach (Node pathNode in wayPointNodes) { 
-			wayPoints.Add(pathNode.position);
-			Debug.Log (pathNode.position);
+	//Determines the intial path segment for the car
+	private void InitialPathPlan() {
+		//first triggered thread job for this car
+		currentThreadJob = new DynamicPathThreadJob (PathPlanningDataStructures.graph.getClosestNode (
+			transform.position), PathPlanningDataStructures.graph.endNode);
+		currentThreadJob.Start ();
+		while (true) {
+			if (currentThreadJob.isFinished()) {
+				currentWayPoints = currentThreadJob.getPathWayPoints();
+				pathCalculated = false;
+				jobInProgress = false;
+				break;
+			}
 		}
 	}
 
@@ -182,18 +186,6 @@ public class CarControl : MonoBehaviour {
 
 	//set input_steer and input_torque to move towards the way point 
 	private void GoToWayPoint() {
-		/*
-		if (avoidObject) {
-			Vector3 facing = posObject - transform.position;
-			if (facing.magnitude > 5.0f) {
-
-				Quaternion awayRotation = Quaternion.LookRotation(wayPoints[current_point]); 
-				transform.rotation = Quaternion.Slerp (transform.rotation, awayRotation, 15 * Time.deltaTime);
-				transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0); 
-				avoidObject = false; 	
-			}
-
-		} */
 		float steer = 0; 
 		if (leftObj && !rightObj)
 			steer = Mathf.Max (1.2f/LeftDis, 0.35f);
@@ -205,19 +197,20 @@ public class CarControl : MonoBehaviour {
 		if (centerObj && (leftObj || rightObj)) {
 			steer = steer * 1.42f; 
 		}
-		//Vector3 newDirection = transform.InverseTransformDirection (new Vector3 (wayPoints [current_point].x, transform.position.y, wayPoints [current_point].z) - transform.position) + new Vector3(x_displacement, 0, 0); 
-		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (wayPoints[current_point].x, transform.position.y, wayPoints[current_point].z));
-		//Vector3 travelDirection = transform.TransformDirection (newDirection); 
-		//print ("new travel: " + travelDirection + "old travel: " + travelDirection1 + "local: " + newDirection);
-		//Debug.DrawRay (transform.position, travelDirection, Color.yellow, 0.1f);
+
+		Vector3 travelDirection = transform.InverseTransformPoint(new Vector3 (currentWayPoints[current_point].x, transform.position.y, currentWayPoints[current_point].z));
 
 		// For skipping if waypoint behind me
-		Vector3 relPosition = transform.InverseTransformPoint (wayPoints [current_point]);
+		Vector3 relPosition = transform.InverseTransformPoint (currentWayPoints [current_point]);
 		if (relPosition.z <= 0) {
 			int see_ahead = current_point + 1;
-			if (see_ahead >= wayPoints.Count)
+			//move to the next path segment
+			if (see_ahead >= currentWayPoints.Count) {
+				currentWayPoints = nextWayPoints;
+				pathCalculated = false;
 				see_ahead = 0;
-			Vector3 seeDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[see_ahead].x, transform.position.y, wayPoints[see_ahead].z));
+			}
+			Vector3 seeDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[see_ahead].x, transform.position.y, currentWayPoints[see_ahead].z));
 			if (seeDirection.z > 0) {
 				print ("Skipping waypoint");
 				current_point = see_ahead;
@@ -244,15 +237,20 @@ public class CarControl : MonoBehaviour {
 		if (travelDirection.magnitude < 12) {
 			current_point ++;
 
-			if (current_point >= wayPoints.Count) {
+			if (current_point >= currentWayPoints.Count) {
+				currentWayPoints = nextWayPoints;
+				pathCalculated = false;
 				current_point = 0;
 			}
 		}
 
 		int next_point = current_point + 1;
-		if (next_point >= wayPoints.Count)
-			next_point = 0;
-		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (wayPoints[next_point].x, transform.position.y, wayPoints[next_point].z));
+		if (next_point >= currentWayPoints.Count) {
+			currentWayPoints = nextWayPoints;
+			pathCalculated = false;
+			current_point = 0;
+		}
+		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[next_point].x, transform.position.y, currentWayPoints[next_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 
 		if ((leftObj || rightObj || centerObj) && (input_torque > 0) && (rb.velocity.magnitude > 1)) {
@@ -260,7 +258,6 @@ public class CarControl : MonoBehaviour {
 		} else {
 			brake_power = 0.0f;
 		}
-		print ("steer: " + input_steer + " brake: " + brake_power + " " + "input torque: " + input_torque); 
 		//print (rb.velocity.sqrMagnitude);
 	}
 
@@ -270,18 +267,18 @@ public class CarControl : MonoBehaviour {
 	}
 
 	public void OnDrawGizmosSelected() {
-		if (wayPoints == null) {
+		if (currentWayPoints == null) {
 			return; 
 		}
-		for (int i = 0; i < wayPoints.Count; i++) { 
-			Vector3 point = wayPoints[i];
+		for (int i = 0; i < currentWayPoints.Count; i++) { 
+			Vector3 point = currentWayPoints[i];
 			Gizmos.color = new Color (0.0f, 0.0f, 1.0f, 0.3f);
 			Gizmos.DrawCube (point, new Vector3 (5.0f, 5.0f, 5.0f));
 		
 			int x = i + 1;
-			if (x < wayPoints.Count) {
+			if (x < currentWayPoints.Count) {
 				Gizmos.color = Color.magenta;
-				Gizmos.DrawLine (point, wayPoints[x]);
+				Gizmos.DrawLine (point, currentWayPoints[x]);
 			}
 		}
 

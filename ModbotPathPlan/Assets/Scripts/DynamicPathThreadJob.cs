@@ -28,47 +28,45 @@ public class DynamicPathThreadJob : ThreadJob
 	// traversal is pathLength away from the start node, the traversal is complete
 	// </summary>
 	protected override void ThreadFunction() {
-		while (true) {
-			PriorityQueue<Node> open = new PriorityQueue<Node> (AStar.graph.Size ());
-			HashSet<Node> closed = new HashSet<Node> ();
-			Dictionary<Node, Node> came_from = new Dictionary<Node, Node> ();
-			Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
-			came_from.Add (startNode, null);
-			cost_so_far.Add (startNode, 0);
-			open.queue (PathPlanningDataStructures.heuristic.Estimate (startNode), startNode);
-		
-			while (open.getSize() > 0) {
-				Node current = open.dequeue ();
-			
-				if (current.Equals (PathPlanningDataStructures.graph.endNode) || 
-					Node.distanceBetweenNodes (startNode, current) >= pathLength) {
-					destinationNode = current;
-					break;
-				}
-			
-				foreach (Node n in current.neighbors) {
-				
-					float graph_cost = cost_so_far [current] + Node.distanceBetweenNodes (current, n);
-				
-					if (cost_so_far.ContainsKey (n) == false || graph_cost < cost_so_far [n]) {
-						cost_so_far [n] = graph_cost;
-						float priority = graph_cost + PathPlanningDataStructures.heuristic.Estimate (n);
-						open.queue (priority, n);
-						came_from [n] = current;
-					}
-				}
+		PriorityQueue<Node> open = new PriorityQueue<Node> (AStar.graph.Size ());
+		HashSet<Node> closed = new HashSet<Node> ();
+		Dictionary<Node, Node> came_from = new Dictionary<Node, Node> ();
+		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
+		came_from.Add (startNode, null);
+		cost_so_far.Add (startNode, 0);
+		open.queue (PathPlanningDataStructures.heuristic.Estimate (startNode), startNode);
+	
+		while (open.getSize() > 0) {
+			Node current = open.dequeue ();
+			Debug.Log (current.ToString());
+			if (current.Equals (PathPlanningDataStructures.graph.endNode) || 
+				Node.distanceBetweenNodes (startNode, current) >= pathLength) {
+				destinationNode = current;
+				break;
 			}
 		
-			//Put nodes of the path into the list
-			List<Node> path = new List<Node> ();
-			Node currentNode = destinationNode;
-			path.Add (currentNode);
-			while (currentNode.Equals(startNode) == false) {
-				currentNode = came_from [currentNode];
-				path.Add (currentNode);
+			foreach (Node n in current.neighbors) {
+			
+				float graph_cost = cost_so_far [current] + Node.distanceBetweenNodes (current, n);
+			
+				if (cost_so_far.ContainsKey (n) == false || graph_cost < cost_so_far [n]) {
+					cost_so_far [n] = graph_cost;
+					float priority = graph_cost + PathPlanningDataStructures.heuristic.Estimate (n);
+					open.queue (priority, n);
+					came_from [n] = current;
+				}
 			}
-			path.Reverse ();
 		}
+	
+		//Put nodes of the path into the list
+		List<Node> path = new List<Node> ();
+		Node currentNode = destinationNode;
+		path.Add (currentNode);
+		while (currentNode.Equals(startNode) == false) {
+			currentNode = came_from [currentNode];
+			path.Add (currentNode);
+		}
+		path.Reverse ();
 	}
 
 	// <summary>
