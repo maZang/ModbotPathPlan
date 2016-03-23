@@ -106,7 +106,7 @@ public class CarControl : MonoBehaviour {
 		CenterDis = GetComponent <ObstacleAvoid> ().CenterDis; 
 		rb.drag = rb.velocity.magnitude / 250;
 		//Check if the next path segment needs to be calculated in a thread
-		if (pathCalculated == false && jobInProgress == false) {
+		/*if (pathCalculated == false && jobInProgress == false) {
 			if (currentWayPoints == null) {
 				//first triggered thread job for this car
 				currentThreadJob = new DynamicPathThreadJob(PathPlanningDataStructures.graph.getClosestNode(
@@ -119,7 +119,7 @@ public class CarControl : MonoBehaviour {
 				currentThreadJob.Start();
 			}
 			jobInProgress = true;
-		}
+		}*/
 		GoToWayPoint ();
 
 		input_rpm = (GetCollider (0).rpm + GetCollider (1).rpm) / 2 * GearRatio [CurrGear];

@@ -1,3 +1,4 @@
+using UnityEngine;
 using System.Collections.Generic;
 
 // DynamicPathThreadJob is a class that implements the thread to dynamically calculate/modify
@@ -67,7 +68,6 @@ public class DynamicPathThreadJob : ThreadJob
 				path.Add (currentNode);
 			}
 			path.Reverse ();
-			return path;
 		}
 	}
 

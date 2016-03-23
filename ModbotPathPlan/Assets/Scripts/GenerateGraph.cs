@@ -15,9 +15,9 @@ public class GenerateGraph {
 		Triangle[] meshTriangles = new Triangle[navmesh.indices.Length/3];
 
 		//get all the vertices on the sand mesh
-		GameObject sandObject = GameObject.Find("sand");
-		Mesh sandMesh = sandObject.GetComponent<MeshFilter>().mesh;
-		Vector3[] theVertices = sandMesh.vertices;
+		//GameObject sandObject = GameObject.Find("sand");
+		//Mesh sandMesh = sandObject.GetComponent<MeshFilter>().mesh;
+		//Vector3[] theVertices = sandMesh.vertices;
 
 		//will contain mapping from a string containing the Vector3 pair side and the lane type of a node(ex: (1,2,3) and (4,5,6)
 		//in "middle" will be respresented as "1,2,3 - 4,5,6 middle" with the smaller Vector3 coming first) to the node on that
