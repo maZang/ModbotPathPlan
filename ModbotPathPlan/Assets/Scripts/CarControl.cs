@@ -121,7 +121,6 @@ public class CarControl : MonoBehaviour {
 				Debug.Log ("Finished next thread job. Size: " + nextWayPoints.Count);
 			}
 		}
-		
 		GoToWayPoint ();
 
 		input_rpm = (GetCollider (0).rpm + GetCollider (1).rpm) / 2 * GearRatio [CurrGear];

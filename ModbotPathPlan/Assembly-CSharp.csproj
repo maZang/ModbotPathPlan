@@ -51,6 +51,8 @@
      <Compile Include="Assets\EasyRoads3D Free\scripts\SideObjectInit.cs" />
      <Compile Include="Assets\EasyRoads3D Free\scripts\SurfaceScript.cs" />
      <Compile Include="Assets\EasyRoads3D Free\scripts\sideObjectScript.cs" />
+     <Compile Include="Assets\ItemController.cs" />
+     <Compile Include="Assets\ItemTrigger.cs" />
      <Compile Include="Assets\Scripts\AStar.cs" />
      <Compile Include="Assets\Scripts\CarControl.cs" />
      <Compile Include="Assets\Scripts\DynamicPathThreadJob.cs" />
