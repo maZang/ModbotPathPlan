@@ -254,7 +254,7 @@ public class CarControl : MonoBehaviour {
 			}
 		}
 
-		Debug.Log ("Current Way Point: " + current_point);
+		//Debug.Log ("Current Way Point: " + current_point);
 		int next_point = current_point + 1;
 		if (next_point >= currentWayPoints.Count) {
 			currentWayPoints = nextWayPoints;

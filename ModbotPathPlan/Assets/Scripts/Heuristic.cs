@@ -6,7 +6,7 @@ public class HeuristicD {
 	
 	private Dictionary<Node, float> heuristicCost;
 	//public List<GameObject> itemList;
-	private GameObject item = GameObject.Find ("Item1");
+	private ItemController ic = GameObject.Find("ItemControllers").GetComponent<ItemController>();
 
 	public HeuristicD(GenerateGraph graph) {
 		heuristicCost = new Dictionary<Node, float>();
@@ -32,7 +32,8 @@ public class HeuristicD {
 	}
 	
 	public float Estimate(Node n) {
-		float reduction = 1.0f;
+		float reduction = ic.getReduction(n.position);
+
 		/*foreach (GameObject item in itemList) {
 			if (!item.activeSelf) {
 				continue;
@@ -45,7 +46,13 @@ public class HeuristicD {
 		/* if (item.GetComponent<SphereCollider> ().bounds.Contains (n.position)) {
 			reduction = 2.0f;
 		} */ 
-		Debug.Log (item);
-		return heuristicCost[n] / reduction;
+		if (reduction < 0) {
+			Debug.Log ("!!!!!!! " + n.position);
+			return reduction;
+		} else {
+			return heuristicCost [n];
+		}
+		//Debug.Log (heuristicCost[n] / reduction);
+		//return heuristicCost[n] / reduction;
 	}
 }
