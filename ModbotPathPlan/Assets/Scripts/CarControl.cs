@@ -64,6 +64,7 @@ public class CarControl : MonoBehaviour {
 		rb = GetComponent<Rigidbody>();
 		rb.centerOfMass = new Vector3(0.0f,-0.3f,0.7f);
 		InitialPathPlan();
+		Debug.Log ("Initial Path Plan Done");
 	}
 
 	//allows for manual drive or AI pathfinding
@@ -117,6 +118,7 @@ public class CarControl : MonoBehaviour {
 				nextWayPoints = currentThreadJob.getPathWayPoints();
 				pathCalculated = true;
 				jobInProgress = false;
+				Debug.Log ("Finished next thread job. Size: " + nextWayPoints.Count);
 			}
 		}
 		
@@ -246,13 +248,14 @@ public class CarControl : MonoBehaviour {
 			}
 		}
 
+		Debug.Log ("Current Way Point: " + current_point);
 		int next_point = current_point + 1;
 		if (next_point >= currentWayPoints.Count) {
 			currentWayPoints = nextWayPoints;
 			pathCalculated = false;
 			current_point = 0;
 		}
-		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[next_point].x, transform.position.y, currentWayPoints[next_point].z));
+		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[current_point].x, transform.position.y, currentWayPoints[current_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 
 		if ((leftObj || rightObj || centerObj) && (input_torque > 0) && (rb.velocity.magnitude > 1)) {

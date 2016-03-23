@@ -1,3 +1,5 @@
+using UnityEngine;
+
 // PathPlanningDataStructures is a class that contains the essential data structures necessary
 // for implementing the path planning approach
 
@@ -15,6 +17,7 @@ public class PathPlanningDataStructures {
 		graph = new GenerateGraph();
 		heuristic = new HeuristicD(graph);
 		globalLock = new object();
+		Debug.Log ("Heuristic Finished");
 	}
 
 }

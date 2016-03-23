@@ -13,7 +13,6 @@ public class HeuristicD {
 
 		PriorityQueue<Node> pq = new PriorityQueue<Node>(graph.Size ());
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
-		Debug.Log ("Queued: " + graph.endNode.ToString());
 		pq.queue(0.0f, graph.endNode);
 		cost_so_far.Add (graph.endNode, 0.0f);
 		while (pq.getSize() > 0) {
@@ -23,7 +22,6 @@ public class HeuristicD {
 				float new_cost = cost_so_far[current] + Node.distanceBetweenNodes(current, current.neighbors[i]);
 				if (!cost_so_far.ContainsKey(current.neighbors[i]) || new_cost < cost_so_far[current.neighbors[i]]) {
 					cost_so_far[current.neighbors[i]] = new_cost;
-					Debug.Log ("Queued: " + current.neighbors[i]);
 					pq.queue(new_cost, current.neighbors[i]);
 				}	
 			}
