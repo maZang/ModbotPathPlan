@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class HeuristicD {
-
-	private GenerateGraph graph;
+	
 	private Dictionary<Node, float> heuristicCost;
+	//public List<GameObject> itemList;
+	private GameObject item = GameObject.Find ("Item1");
 
 	public HeuristicD(GenerateGraph graph) {
-		this.graph = graph;
 		heuristicCost = new Dictionary<Node, float>();
+		//itemList = new List<GameObject> ();
+		//GameObject item = GameObject.Find ("Item1");
+		//itemList.Add (item);
 
 		PriorityQueue<Node> pq = new PriorityQueue<Node>(graph.Size ());
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
@@ -29,6 +32,20 @@ public class HeuristicD {
 	}
 	
 	public float Estimate(Node n) {
-		return heuristicCost[n];
+		float reduction = 1.0f;
+		/*foreach (GameObject item in itemList) {
+			if (!item.activeSelf) {
+				continue;
+			} else {
+				if (item.GetComponent<SphereCollider>().bounds.Contains(n.position)) {
+					reduction = 2.0f;
+				}
+			}
+		}*/
+		/* if (item.GetComponent<SphereCollider> ().bounds.Contains (n.position)) {
+			reduction = 2.0f;
+		} */ 
+		Debug.Log (item);
+		return heuristicCost[n] / reduction;
 	}
 }
