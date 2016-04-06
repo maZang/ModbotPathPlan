@@ -107,7 +107,7 @@ public class CarControl : MonoBehaviour {
 
 		//Check if the next path segment needs to be calculated in a thread
 		if (pathCalculated == false && jobInProgress == false) {
-			//triggers thread jobs for this car when currentWayPoints is not null
+			//trigger thread job for this car to obtain the next set of waypoints
 			Node pathStartNode;
 			if (currentThreadJob.destinationNode == PathPlanningDataStructures.graph.endNode) {
 				pathStartNode = startNode;
