@@ -152,15 +152,12 @@ public class CarControl : MonoBehaviour {
 		//first triggered thread job for this car
 		startNode = PathPlanningDataStructures.graph.getClosestNode (transform.position);
 		currentThreadJob = new DynamicPathThreadJob (startNode, PathPlanningDataStructures.graph.endNode);
-		currentThreadJob.Start ();
-		while (true) {
-			if (currentThreadJob.isFinished()) {
-				currentWayPoints = currentThreadJob.getPathWayPoints();
-				pathCalculated = false;
-				jobInProgress = false;
-				break;
-			}
-		}
+		currentThreadJob.Start();
+		currentThreadJob.Join();
+		currentWayPoints = currentThreadJob.getPathWayPoints();
+		//indicate that next path segment needs to calculated
+		pathCalculated = false;
+		jobInProgress = false;
 	}
 
 	//get the way points from the in game object
