@@ -112,7 +112,7 @@ public class CarControl : MonoBehaviour {
 			if (currentThreadJob.destinationNode == PathPlanningDataStructures.graph.endNode) {
 				pathStartNode = startNode;
 			} else {
-				pathStartNode = currentThreadJob.destinationNode;
+				pathStartNode = PathPlanningDataStructures.graph.getClosestNode (transform.position);
 			}
 			currentThreadJob = new DynamicPathThreadJob(pathStartNode, 
 			    PathPlanningDataStructures.graph.endNode);
@@ -123,7 +123,6 @@ public class CarControl : MonoBehaviour {
 		if (jobInProgress) {
 			if (currentThreadJob.isFinished()) {
 				nextWayPoints = currentThreadJob.getPathWayPoints();
-				pathCalculated = true;
 				jobInProgress = false;
 				Debug.Log ("Finished next thread job. Size: " + nextWayPoints.Count);
 			}
@@ -156,6 +155,7 @@ public class CarControl : MonoBehaviour {
 		while (true) {
 			if (currentThreadJob.isFinished()) {
 				currentWayPoints = currentThreadJob.getPathWayPoints();
+				Debug.Log (currentWayPoints.Count + "ASLKDALDK" );
 				pathCalculated = false;
 				jobInProgress = false;
 				break;
@@ -256,11 +256,12 @@ public class CarControl : MonoBehaviour {
 
 		//Debug.Log ("Current Way Point: " + current_point);
 		int next_point = current_point + 1;
-		if (next_point >= currentWayPoints.Count) {
+		if (next_point >= currentWayPoints.Count && nextWayPoints != null) {
 			currentWayPoints = nextWayPoints;
 			pathCalculated = false;
 			current_point = 0;
 		}
+		Debug.Log (currentWayPoints);
 		Vector3 nextDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[current_point].x, transform.position.y, currentWayPoints[current_point].z));
 		float angle = Vector3.Angle (travelDirection, nextDirection);
 

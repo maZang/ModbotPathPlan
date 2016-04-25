@@ -9,7 +9,7 @@ public class DynamicPathThreadJob : ThreadJob
 	public Node endNode;
 	public Node destinationNode;
 	private List<Vector3> pathWayPoints; 
-	private const double pathLength = 50;
+	private const double pathLength = 20;
 
 	// <summary>
 	// Constructor that initializes the start node and end node of the path planning
@@ -34,12 +34,16 @@ public class DynamicPathThreadJob : ThreadJob
 		Dictionary<Node, float> cost_so_far = new Dictionary<Node, float> ();
 		came_from.Add (startNode, null);
 		cost_so_far.Add (startNode, 0);
+		Debug.Log ("the start node: " + startNode);
 		open.queue (PathPlanningDataStructures.heuristic.Estimate (startNode), startNode);
 		while (open.getSize() > 0) {
 			Node current = open.dequeue ();
 
 			if (current.Equals (PathPlanningDataStructures.graph.endNode) || 
 				Node.distanceBetweenNodes (startNode, current) >= pathLength) {
+				if (came_from[current] == null) {
+					came_from[current] = startNode;
+				}
 				destinationNode = current;
 				break;
 			}
