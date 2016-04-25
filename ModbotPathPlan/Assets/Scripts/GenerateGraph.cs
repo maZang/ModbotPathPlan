@@ -126,10 +126,14 @@ public class GenerateGraph {
 	// <param name="pos"> a Vector3 </param>
 	public Node getClosestNode(Vector3 pos) {
 		float minimumDistance = Mathf.Infinity; 
+		float z_diff_threshold = 5;
 		Node closestNode = null; 
 		foreach (Node node in nodes) {
 			float distance = Vector3.Distance(node.position, pos);
-			if (distance < minimumDistance) {
+			if (distance < minimumDistance && pos.z - node.position.z < z_diff_threshold) {
+				Debug.Log(pos.z - node.position.z);
+				Debug.Log (pos);
+				Debug.Log (node.position);
 				closestNode = node; 
 				minimumDistance = distance; 
 			}

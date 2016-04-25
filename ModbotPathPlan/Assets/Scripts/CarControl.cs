@@ -106,8 +106,8 @@ public class CarControl : MonoBehaviour {
 		rb.drag = rb.velocity.magnitude / 250;
 
 		//Check if the next path segment needs to be calculated in a thread
-		if (pathCalculated == false && jobInProgress == false) {
-			//triggers thread jobs for this car when currentWayPoints is not null
+		if (jobInProgress == false) {
+			//trigger thread job for this car to obtain the next set of waypoints
 			Node pathStartNode;
 			if (currentThreadJob.destinationNode == PathPlanningDataStructures.graph.endNode) {
 				pathStartNode = startNode;
@@ -120,7 +120,7 @@ public class CarControl : MonoBehaviour {
 			jobInProgress = true;
 		}
 		//Check if in progress thread has completed the path calculation
-		if (jobInProgress) {
+		if (jobInProgress && nextWayPoints == null) {
 			if (currentThreadJob.isFinished()) {
 				nextWayPoints = currentThreadJob.getPathWayPoints();
 				jobInProgress = false;
@@ -151,16 +151,12 @@ public class CarControl : MonoBehaviour {
 		//first triggered thread job for this car
 		startNode = PathPlanningDataStructures.graph.getClosestNode (transform.position);
 		currentThreadJob = new DynamicPathThreadJob (startNode, PathPlanningDataStructures.graph.endNode);
-		currentThreadJob.Start ();
-		while (true) {
-			if (currentThreadJob.isFinished()) {
-				currentWayPoints = currentThreadJob.getPathWayPoints();
-				Debug.Log (currentWayPoints.Count + "ASLKDALDK" );
-				pathCalculated = false;
-				jobInProgress = false;
-				break;
-			}
-		}
+		currentThreadJob.Start();
+		currentThreadJob.Join();
+		currentWayPoints = currentThreadJob.getPathWayPoints();
+		//indicate that next path segment needs to calculated
+		pathCalculated = false;
+		jobInProgress = false;
 	}
 
 	//get the way points from the in game object
@@ -196,6 +192,11 @@ public class CarControl : MonoBehaviour {
 
 	//set input_steer and input_torque to move towards the way point 
 	private void GoToWayPoint() {
+		if (nextWayPoints != null) {
+			currentWayPoints = nextWayPoints;
+			nextWayPoints = null;
+			current_point = 0;
+		}
 		float steer = 0; 
 		if (leftObj && !rightObj)
 			steer = Mathf.Max (1.2f/LeftDis, 0.35f);
@@ -215,10 +216,14 @@ public class CarControl : MonoBehaviour {
 		if (relPosition.z <= 0) {
 			int see_ahead = current_point + 1;
 			//move to the next path segment
-			if (see_ahead >= currentWayPoints.Count) {
+			if (see_ahead >= currentWayPoints.Count && nextWayPoints != null) {
 				currentWayPoints = nextWayPoints;
-				pathCalculated = false;
-				see_ahead = 0;
+				nextWayPoints = null;
+				current_point = 0;
+				return;
+			}
+			if (see_ahead >= currentWayPoints.Count) {
+				return;
 			}
 			Vector3 seeDirection = transform.InverseTransformPoint (new Vector3 (currentWayPoints[see_ahead].x, transform.position.y, currentWayPoints[see_ahead].z));
 			if (seeDirection.z > 0) {
@@ -247,8 +252,9 @@ public class CarControl : MonoBehaviour {
 		if (travelDirection.magnitude < 12) {
 			current_point ++;
 
-			if (current_point >= currentWayPoints.Count) {
+			if (current_point >= currentWayPoints.Count && nextWayPoints != null) {
 				currentWayPoints = nextWayPoints;
+				nextWayPoints = null;
 				pathCalculated = false;
 				current_point = 0;
 			}
@@ -258,6 +264,7 @@ public class CarControl : MonoBehaviour {
 		int next_point = current_point + 1;
 		if (next_point >= currentWayPoints.Count && nextWayPoints != null) {
 			currentWayPoints = nextWayPoints;
+			nextWayPoints = null;
 			pathCalculated = false;
 			current_point = 0;
 		}

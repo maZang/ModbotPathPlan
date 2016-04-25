@@ -36,6 +36,10 @@ public class ThreadJob
 	{
 		m_Thread.Abort();
 	}
+
+	public virtual void Join() {
+		m_Thread.Join();
+	}
 	
 	protected virtual void ThreadFunction() { }
 	
